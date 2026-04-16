@@ -149,6 +149,7 @@
 
   <div id="game-section"><div class="card"><div class="loading">Loading…</div></div></div>
   <div id="season-section"></div>
+  <div id="upcoming-section"></div>
 
   <div class="footer">
     <button class="refresh-btn" onclick="load()">Refresh</button>
@@ -172,6 +173,12 @@
   function daysAgo(n) {
     const d = new Date();
     d.setDate(d.getDate() - n);
+    return localDate(d);
+  }
+
+  function daysAhead(n) {
+    const d = new Date();
+    d.setDate(d.getDate() + n);
     return localDate(d);
   }
 
@@ -217,6 +224,14 @@
     return get(
       `https://statsapi.mlb.com/api/v1/standings?leagueId=${LEAGUE_ID}&season=${yr}` +
       `&standingsType=regularSeason&hydrate=team,record,streak`
+    );
+  }
+
+  function fetchUpcomingGames() {
+    return get(
+      `https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=${TEAM_ID}` +
+      `&startDate=${daysAhead(1)}&endDate=${daysAhead(45)}&gameType=R` +
+      `&hydrate=team,probablePitcher`
     );
   }
 
@@ -599,6 +614,51 @@
     return html ? `<div class="card">${html}</div>` : '';
   }
 
+  // ── Upcoming games ────────────────────────────────────────────────────────
+
+  function renderUpcoming(upcomingData) {
+    const games = [];
+    for (const d of upcomingData?.dates ?? []) {
+      for (const g of d.games ?? []) {
+        games.push({ date: d.date, game: g });
+        if (games.length >= 3) break;
+      }
+      if (games.length >= 3) break;
+    }
+    if (!games.length) return '';
+
+    const rows = games.map(({ date, game }) => {
+      const aw = game.teams?.away;
+      const hm = game.teams?.home;
+      const jaysAway = aw?.team?.id === TEAM_ID;
+      const opp = jaysAway ? hm?.team : aw?.team;
+      const ha  = jaysAway ? '@ ' : 'vs ';
+      const oppName = opp?.teamName ?? opp?.name ?? '—';
+      const d = new Date(date + 'T12:00:00'); // noon local to avoid TZ edge cases
+      const dateStr = d.toLocaleDateString('en-CA', { weekday: 'short', month: 'short', day: 'numeric' });
+      const timeStr = fmtTime(game.gameDate);
+      const awPP = aw?.probablePitcher?.fullName;
+      const hmPP = hm?.probablePitcher?.fullName;
+      const jaysPP = jaysAway ? awPP : hmPP;
+      const oppPP  = jaysAway ? hmPP : awPP;
+
+      return `<div class="sec" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#1c1c1e">${ha}${oppName}</div>
+          <div style="font-size:11px;color:#aaa;margin-top:2px">${dateStr}${timeStr ? ' · ' + timeStr : ''}</div>
+          ${(jaysPP || oppPP) ? `<div style="font-size:11px;color:#bbb;margin-top:3px">
+            ${jaysPP ? `TOR: ${jaysPP}` : ''}${jaysPP && oppPP ? ' &nbsp;·&nbsp; ' : ''}${oppPP ? `${abbr(opp)}: ${oppPP}` : ''}
+          </div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="card">
+      <div class="sec"><div class="sec-title">Upcoming Games</div></div>
+      ${rows}
+    </div>`;
+  }
+
   // ── Main load ─────────────────────────────────────────────────────────────
 
   async function load() {
@@ -611,10 +671,11 @@
     });
 
     try {
-      const [scheduleData, standingsData, recentData] = await Promise.all([
+      const [scheduleData, standingsData, recentData, upcomingData] = await Promise.all([
         fetchSchedule(localDate()),
         fetchStandings().catch(() => null),
         fetchRecentGames().catch(() => null),
+        fetchUpcomingGames().catch(() => null),
       ]);
 
       const games = scheduleData.dates?.[0]?.games ?? [];
@@ -636,6 +697,7 @@
       }
 
       seasonEl.innerHTML = renderSeason(standingsData, recentData);
+      document.getElementById('upcoming-section').innerHTML = renderUpcoming(upcomingData);
 
       document.getElementById('updated').textContent =
         'Updated at ' + new Date().toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' });

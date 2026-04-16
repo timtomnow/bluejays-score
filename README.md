@@ -22,6 +22,7 @@ A lightweight, single-file web app for tracking the Toronto Blue Jays — live s
 - Season record, winning %, and current streak
 - Last 10 game results (W/L dots)
 - Full AL East standings with games back and streak
+- Next 3 upcoming scheduled games with date, time, and probable starters
 
 **Auto-refresh**
 - Every 30 seconds during live games
