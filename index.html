@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blue Jays Score</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #003087;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .logo-img {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      color: #003087;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .date {
+      color: #888;
+      font-size: 13px;
+      margin-bottom: 28px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+    }
+    .live    { background: #ff3b30; color: white; }
+    .final   { background: #e5e5ea; color: #555; }
+    .preview { background: #34c759; color: white; }
+    .off     { background: #e5e5ea; color: #555; }
+
+    .teams {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 16px 0 20px;
+      gap: 12px;
+    }
+
+    .team { flex: 1; }
+
+    .team-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1c1c1e;
+      margin-bottom: 4px;
+    }
+
+    .team-record {
+      font-size: 11px;
+      color: #aaa;
+    }
+
+    .score {
+      font-size: 52px;
+      font-weight: 800;
+      color: #003087;
+      min-width: 48px;
+    }
+
+    .score-sep {
+      font-size: 36px;
+      color: #ccc;
+      font-weight: 300;
+    }
+
+    .inning {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    /* Base/out situation row */
+    .situation {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      margin: 16px 0 8px;
+    }
+
+    /* Diamond SVG wrapper */
+    .diamond-wrap { display: flex; flex-direction: column; align-items: center; }
+    .diamond-label { font-size: 10px; color: #aaa; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+    /* Outs */
+    .outs-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .outs-dots { display: flex; gap: 7px; }
+    .out-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      background: transparent;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .out-dot.on { background: #ff3b30; border-color: #ff3b30; }
+
+    .game-time {
+      font-size: 20px;
+      color: #333;
+      font-weight: 600;
+      margin: 12px 0;
+    }
+
+    .venue {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 8px;
+    }
+
+    .off-day {
+      color: #555;
+      font-size: 16px;
+      padding: 12px 0;
+    }
+
+    .refresh-btn {
+      margin-top: 24px;
+      background: #003087;
+      color: white;
+      border: none;
+      padding: 10px 28px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .refresh-btn:hover { background: #004aad; }
+
+    .loading { color: #888; font-size: 15px; padding: 20px 0; }
+    .error   { color: #ff3b30; font-size: 14px; padding: 12px 0; }
+    .winner  { font-weight: 800; color: #003087; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img
+      class="logo-img"
+      src="https://www.mlbstatic.com/team-logos/141.svg"
+      onerror="this.onerror=null;this.src='https://a.espncdn.com/i/teamlogos/mlb/500/tor.png'"
+      alt="Toronto Blue Jays"
+    >
+    <h1>Toronto Blue Jays</h1>
+    <div class="date" id="date-label"></div>
+    <div id="content"><div class="loading">Loading...</div></div>
+    <button class="refresh-btn" onclick="load()">Refresh</button>
+  </div>
+
+  <script>
+    const TEAM_ID = 141;
+
+    function today() {
+      return new Date().toLocaleDateString('en-CA');
+    }
+
+    function formatTime(utcStr) {
+      if (!utcStr) return '';
+      return new Date(utcStr).toLocaleTimeString('en-CA', {
+        hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
+      });
+    }
+
+    function inningLabel(ls) {
+      if (!ls) return '';
+      const half = ls.isTopInning ? 'Top' : 'Bot';
+      return `${half} ${ls.currentInningOrdinal || ls.currentInning}`;
+    }
+
+    // SVG diamond showing runners on base.
+    // Bases: home(bottom), 1st(right), 2nd(top), 3rd(left)
+    function renderDiamond(offense) {
+      const on1 = !!(offense?.first);
+      const on2 = !!(offense?.second);
+      const on3 = !!(offense?.third);
+
+      const SIZE = 80;
+      const cx = SIZE / 2, cy = SIZE / 2;
+      const r = 28; // radius of diamond ring
+      // positions: top=2nd, right=1st, bottom=home, left=3rd
+      const bases = [
+        { x: cx,     y: cy - r, on: on2,  label: '2' },  // 2nd
+        { x: cx + r, y: cy,     on: on1,  label: '1' },  // 1st
+        { x: cx,     y: cy + r, on: false, label: 'H' }, // home (always empty marker)
+        { x: cx - r, y: cy,     on: on3,  label: '3' },  // 3rd
+      ];
+
+      const baseSize = 9; // half-diagonal of the rotated square
+
+      const baseSVGs = bases.map(b => {
+        const fill   = b.label === 'H' ? 'none'    : b.on ? '#003087' : '#e5e5ea';
+        const stroke = b.label === 'H' ? '#bbb'    : b.on ? '#003087' : '#ccc';
+        const sw     = b.label === 'H' ? 1.5       : 1;
+        // rotated square via polygon
+        const pts = [
+          `${b.x},${b.y - baseSize}`,
+          `${b.x + baseSize},${b.y}`,
+          `${b.x},${b.y + baseSize}`,
+          `${b.x - baseSize},${b.y}`,
+        ].join(' ');
+        return `<polygon points="${pts}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
+      }).join('');
+
+      // Lines connecting bases (the diamond outline, drawn behind bases)
+      const lineCoords = [
+        [bases[0].x, bases[0].y, bases[1].x, bases[1].y], // 2nd->1st
+        [bases[1].x, bases[1].y, bases[2].x, bases[2].y], // 1st->home
+        [bases[2].x, bases[2].y, bases[3].x, bases[3].y], // home->3rd
+        [bases[3].x, bases[3].y, bases[0].x, bases[0].y], // 3rd->2nd
+      ];
+      const lines = lineCoords.map(([x1,y1,x2,y2]) =>
+        `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#ddd" stroke-width="1.5"/>`
+      ).join('');
+
+      return `
+        <svg width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}" xmlns="http://www.w3.org/2000/svg">
+          ${lines}
+          ${baseSVGs}
+        </svg>`;
+    }
+
+    function renderOuts(outs) {
+      const n = Math.min(outs ?? 0, 3);
+      const dots = [0, 1].map(i =>
+        `<div class="out-dot${i < n ? ' on' : ''}"></div>`
+      ).join('');
+      return `
+        <div class="outs-wrap">
+          <div class="outs-dots">${dots}</div>
+          <div class="diamond-label">${n === 1 ? '1 out' : n + ' outs'}</div>
+        </div>`;
+    }
+
+    async function load() {
+      const el = document.getElementById('content');
+      el.innerHTML = '<div class="loading">Loading...</div>';
+
+      document.getElementById('date-label').textContent = new Date().toLocaleDateString('en-CA', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+
+      try {
+        const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=${TEAM_ID}&date=${today()}&hydrate=linescore(offense),team`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        const games = data.dates?.[0]?.games ?? [];
+        if (games.length === 0) {
+          el.innerHTML = `
+            <div class="status-badge off">Off Day</div>
+            <div class="off-day">No Blue Jays game today.<br>Rest up!</div>`;
+          return;
+        }
+
+        el.innerHTML = games
+          .map(g => renderGame(g))
+          .join('<hr style="margin:20px 0;border:none;border-top:1px solid #eee">');
+
+      } catch (e) {
+        el.innerHTML = `<div class="error">Could not load game data.<br>${e.message}</div>`;
+      }
+    }
+
+    function renderGame(g) {
+      const state         = g.status?.abstractGameState;
+      const detailedState = g.status?.detailedState;
+
+      const away = g.teams?.away;
+      const home = g.teams?.home;
+      const awayName  = away?.team?.teamName ?? away?.team?.name ?? 'Away';
+      const homeName  = home?.team?.teamName ?? home?.team?.name ?? 'Home';
+      const awayScore = away?.score ?? '-';
+      const homeScore = home?.score ?? '-';
+      const awayRec   = away?.leagueRecord ? `${away.leagueRecord.wins}-${away.leagueRecord.losses}` : '';
+      const homeRec   = home?.leagueRecord ? `${home.leagueRecord.wins}-${home.leagueRecord.losses}` : '';
+
+      const jaysAway = away?.team?.id === TEAM_ID;
+      const jaysWon  = state === 'Final' &&
+        ((jaysAway && away?.score > home?.score) || (!jaysAway && home?.score > away?.score));
+
+      let badgeClass = 'off', badgeText = detailedState ?? state ?? 'Unknown';
+      if (state === 'Live')    { badgeClass = 'live';    badgeText = 'Live'; }
+      else if (state === 'Final')   { badgeClass = 'final'; }
+      else if (state === 'Preview') { badgeClass = 'preview'; }
+
+      const ls      = g.linescore;
+      const inning  = state === 'Live' ? inningLabel(ls) : '';
+      const offense = ls?.offense;
+      const outs    = ls?.outs ?? 0;
+
+      let body = '';
+
+      if (state === 'Preview') {
+        body = `
+          <div class="game-time">${formatTime(g.gameDate)}</div>
+          <div class="teams">
+            <div class="team">
+              <div class="team-name">${awayName}</div>
+              <div class="team-record">${awayRec}</div>
+            </div>
+            <div style="color:#ccc;font-size:20px">vs</div>
+            <div class="team">
+              <div class="team-name">${homeName}</div>
+              <div class="team-record">${homeRec}</div>
+            </div>
+          </div>
+          <div class="venue">${g.venue?.name ?? ''}</div>`;
+      } else {
+        const situationBlock = state === 'Live' ? `
+          <div class="situation">
+            <div class="diamond-wrap">
+              ${renderDiamond(offense)}
+              <div class="diamond-label">bases</div>
+            </div>
+            ${renderOuts(outs)}
+          </div>` : '';
+
+        body = `
+          <div class="teams">
+            <div class="team">
+              <div class="team-name ${jaysAway && jaysWon ? 'winner' : ''}">${awayName}</div>
+              <div class="team-record">${awayRec}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="score ${jaysAway && jaysWon ? 'winner' : ''}">${awayScore}</div>
+              <div class="score-sep">–</div>
+              <div class="score ${!jaysAway && jaysWon ? 'winner' : ''}">${homeScore}</div>
+            </div>
+            <div class="team">
+              <div class="team-name ${!jaysAway && jaysWon ? 'winner' : ''}">${homeName}</div>
+              <div class="team-record">${homeRec}</div>
+            </div>
+          </div>
+          ${inning ? `<div class="inning">${inning}</div>` : ''}
+          ${situationBlock}
+          <div class="venue">${g.venue?.name ?? ''}</div>`;
+      }
+
+      return `<div class="status-badge ${badgeClass}">${badgeText}</div>${body}`;
+    }
+
+    // Auto-refresh every 30 s when live
+    setInterval(() => {
+      if (document.querySelector('.status-badge.live')) load();
+    }, 30000);
+
+    load();
+  </script>
+</body>
+</html>
