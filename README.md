@@ -1,21 +1,36 @@
 # Blue Jays Score
 
-A lightweight, single-file web app that shows whether the Toronto Blue Jays are playing today and what the current score is.
+A lightweight, single-file web app for tracking the Toronto Blue Jays — live score, game situation, standings, and more.
 
 **[Live demo](https://timtomnow.github.io/bluejays-score/)**
 
 ## Features
 
-- Today's game status: scheduled, live, or final
-- Live score with inning indicator
-- Base runner diamond (occupied bases highlighted)
-- Out indicators (red dots)
-- Auto-refreshes every 30 seconds during live games
+**Game tracking**
+- Live score with inning indicator (▲/▼)
+- Base runner diamond — occupied bases highlighted in blue
+- Ball/strike count dots (green/amber) and out indicators (red)
+- Current batter vs. pitcher matchup with handedness
+- Last play description (live feed)
+- Per-inning line score with R/H/E totals
+- Probable starting pitchers with ERA (scheduled games)
+- Win/Loss/Save decisions (final games)
+- TV/radio broadcast listings
 - Handles off days and doubleheaders
+
+**Season context**
+- Season record, winning %, and current streak
+- Last 10 game results (W/L dots)
+- Full AL East standings with games back and streak
+
+**Auto-refresh**
+- Every 30 seconds during live games
+- Every 60 seconds when a game is scheduled (to catch first pitch)
+- Every 5 minutes on off days
 
 ## How it works
 
-Fetches data from the free [MLB Stats API](https://statsapi.mlb.com) — no API key or backend required. Open `index.html` directly in any browser, or host it as a static site.
+Fetches data from the free [MLB Stats API](https://statsapi.mlb.com) — no API key, backend, or build step required. Open `index.html` directly in any browser, or host it as a static site.
 
 ## Deploy to GitHub Pages
 
