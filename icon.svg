@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="116 198 280 280" width="512" height="512">
+  <!-- Background -->
+  <rect x="116" y="198" width="280" height="280" rx="50" fill="#003087"/>
+
+  <!-- Baseball body -->
+  <circle cx="256" cy="340" r="130" fill="white" stroke="#ddd" stroke-width="3"/>
+
+  <!-- Baseball stitching left seam -->
+  <path d="M192 232 C138 285 138 395 192 448" fill="none" stroke="#e03030" stroke-width="6" stroke-linecap="round"/>
+  <!-- Left stitch marks, perpendicular to seam curve -->
+  <line x1="170" y1="248" x2="186" y2="258" stroke="#e03030" stroke-width="5" stroke-linecap="round"/>
+  <line x1="152" y1="275" x2="170" y2="281" stroke="#e03030" stroke-width="5" stroke-linecap="round"/>
+  <line x1="138" y1="309" x2="156" y2="311" stroke="#e03030" stroke-width="5" stroke-linecap="round"/>
+  <line x1="132" y1="340" x2="150" y2="340" stroke="#e03030" stroke-width="5" stroke-linecap="round"/>
+  <line x1="138" y1="371" x2="156" y2="369" stroke="#e03030" stroke-width="5" stroke-linecap="round"/>
+  <line x1="152" y1="405" x2="170" y2="399" stroke="#e03030" stroke-width="5" stroke-linecap="round"/>
+  <line x1="170" y1="432" x2="186" y2="422" stroke="#e03030" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Baseball stitching right seam (mirror of left) -->
+  <path d="M320 232 C374 285 374 395 320 448" fill="none" stroke="#e03030" stroke-width="6" stroke-linecap="round"/>
+  <!-- Right stitch marks, perpendicular to seam curve -->
+  <line x1="326" y1="258" x2="342" y2="248" stroke="#e03030" stroke-width="5" stroke-linecap="round"/>
+  <line x1="342" y1="281" x2="360" y2="275" stroke="#e03030" stroke-width="5" stroke-linecap="round"/>
+  <line x1="356" y1="311" x2="374" y2="309" stroke="#e03030" stroke-width="5" stroke-linecap="round"/>
+  <line x1="362" y1="340" x2="380" y2="340" stroke="#e03030" stroke-width="5" stroke-linecap="round"/>
+  <line x1="356" y1="369" x2="374" y2="371" stroke="#e03030" stroke-width="5" stroke-linecap="round"/>
+  <line x1="342" y1="399" x2="360" y2="405" stroke="#e03030" stroke-width="5" stroke-linecap="round"/>
+  <line x1="326" y1="422" x2="342" y2="432" stroke="#e03030" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Bird: scaled to 62%, crest tip lands at top edge of baseball -->
+  <g transform="translate(256,295) scale(0.62) translate(-256,-220)">
+    <!-- Main body -->
+    <ellipse cx="256" cy="255" rx="62" ry="72" fill="#1a6bbf" transform="rotate(-8 256 255)"/>
+
+    <!-- White chest -->
+    <ellipse cx="268" cy="268" rx="32" ry="45" fill="#f0f0f0" transform="rotate(-5 268 268)"/>
+
+    <!-- Black necklace stripe -->
+    <path d="M218 232 Q256 218 294 232 Q290 248 256 245 Q222 248 218 232Z" fill="#111"/>
+
+    <!-- Wing -->
+    <path d="M200 240 Q172 275 178 320 Q210 295 240 280 Q218 260 200 240Z" fill="#1255a0"/>
+    <!-- Wing highlight stripe -->
+    <path d="M185 265 Q185 295 192 315" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+
+    <!-- Tail feathers -->
+    <path d="M198 305 Q178 340 170 365 Q195 350 215 330Z" fill="#1255a0"/>
+    <path d="M210 315 Q195 348 190 372 Q212 355 228 332Z" fill="#1a6bbf"/>
+
+    <!-- Head -->
+    <circle cx="274" cy="195" r="48" fill="#1a6bbf"/>
+
+    <!-- Crest (pointy, slightly wonky) -->
+    <path d="M268 150 Q258 110 278 82 Q285 108 295 128 Q282 135 268 150Z" fill="#1a6bbf"/>
+    <path d="M278 82 Q290 95 295 128 Q284 118 278 82Z" fill="#1255a0"/>
+
+    <!-- White face patch -->
+    <ellipse cx="284" cy="200" rx="22" ry="26" fill="white" transform="rotate(8 284 200)"/>
+
+    <!-- Black mask/stripe through eye area -->
+    <path d="M248 185 Q265 178 296 182 Q295 195 278 198 Q260 198 248 185Z" fill="#111"/>
+
+    <!-- Eye -->
+    <circle cx="285" cy="188" r="7" fill="#111"/>
+    <circle cx="287" cy="186" r="2.5" fill="white"/>
+
+    <!-- Beak (orange-ish, slightly droopy) -->
+    <path d="M298 202 Q320 196 326 205 Q318 214 298 212 Z" fill="#e8822a"/>
+    <line x1="298" y1="207" x2="324" y2="205" stroke="#c06820" stroke-width="2"/>
+
+    <!-- Feet gripping baseball -->
+    <path d="M230 318 Q222 335 215 342 Q220 344 228 338 Q232 348 228 356 Q234 354 238 344 Q244 352 243 360 Q249 356 247 346 Q253 338 248 328Z" fill="#e8822a"/>
+    <path d="M275 318 Q267 335 260 342 Q265 344 273 338 Q277 348 273 356 Q279 354 283 344 Q289 352 288 360 Q294 356 292 346 Q298 338 293 328Z" fill="#e8822a"/>
+  </g>
+</svg>

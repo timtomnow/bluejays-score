@@ -1,6 +1,6 @@
 # Blue Jays Score
 
-A lightweight, single-file web app for tracking the Toronto Blue Jays — live score, game situation, standings, and more.
+A lightweight web app for tracking the Toronto Blue Jays — live score, game situation, standings, and more. Installable as a home screen app on Android and iPhone.
 
 **[Live demo](https://timtomnow.github.io/bluejays-score/)**
 
@@ -28,6 +28,14 @@ A lightweight, single-file web app for tracking the Toronto Blue Jays — live s
 - Every 30 seconds during live games
 - Every 60 seconds when a game is scheduled (to catch first pitch)
 - Every 5 minutes on off days
+
+## Install on your phone
+
+On **Android** (Chrome): visit the site and tap the "Add to Home Screen" banner that appears at the bottom of the screen.
+
+On **iPhone** (Safari): tap the Share button → "Add to Home Screen".
+
+The app installs with a custom icon and opens full-screen without a browser address bar.
 
 ## How it works
 
