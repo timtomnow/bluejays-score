@@ -132,15 +132,101 @@
     .st-table .jays td:first-child { color: #003087; }
 
     /* ── Footer ── */
-    .footer { text-align: center; padding: 4px 0; }
+    .footer { text-align: center; padding: 4px 0 8px; }
     .refresh-btn { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.25); padding: 10px 28px; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; }
     .refresh-btn:active { background: rgba(255,255,255,.25); }
     .updated { font-size: 11px; color: rgba(255,255,255,.35); margin-top: 8px; }
+    .copyright { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 11px; color: rgba(255,255,255,.3); margin-top: 8px; }
+    .copyright a { color: rgba(255,255,255,.7); text-decoration: underline; text-underline-offset: 2px; }
+    .copyright a:hover { color: #fff; }
+    .help-btn { background: none; color: rgba(255,255,255,.4); border: 1px solid rgba(255,255,255,.2); width: 18px; height: 18px; border-radius: 50%; font-size: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; line-height: 1; }
+    .help-btn:active { color: #fff; border-color: rgba(255,255,255,.5); }
+
+    /* ── README overlay ── */
+    #readme-bd { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:300; opacity:0; pointer-events:none; transition:opacity .25s; }
+    #readme-bd.open { opacity:1; pointer-events:auto; }
+    #readme-sh { position:fixed; left:0; right:0; bottom:0; z-index:301; background:#fff; border-radius:20px 20px 0 0; max-height:90vh; display:flex; flex-direction:column; transform:translateY(102%); transition:transform .3s cubic-bezier(.25,.46,.45,.94); box-shadow:0 -8px 32px rgba(0,0,0,.2); }
+    #readme-sh.open { transform:translateY(0); }
+    .readme-head { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid #f0f0f0; flex-shrink:0; }
+    .readme-title { font-size:15px; font-weight:700; color:#1c1c1e; }
+    .readme-close { background:none; border:none; font-size:24px; color:#bbb; cursor:pointer; line-height:1; padding:0 0 2px 16px; }
+    .readme-body { overflow-y:auto; flex:1; padding:16px; -webkit-overflow-scrolling:touch; line-height:1.6; font-size:13px; color:#444; }
+    .readme-body h1 { font-size:18px; font-weight:800; color:#003087; margin:0 0 12px; }
+    .readme-body h2 { font-size:14px; font-weight:700; color:#1c1c1e; margin:16px 0 6px; border-bottom:1px solid #f0f0f0; padding-bottom:4px; }
+    .readme-body p { margin:0 0 8px; }
+    .readme-body ul { padding-left:18px; margin:0 0 8px; }
+    .readme-body li { margin-bottom:3px; }
+    .readme-body a { color:#003087; }
+    .readme-body strong { color:#1c1c1e; }
+    .readme-body code { background:#f5f5f7; border-radius:4px; padding:1px 5px; font-size:12px; }
 
     /* ── States ── */
     .loading { color: #aaa; font-size: 14px; text-align: center; padding: 28px; }
     .err     { color: #ff3b30; font-size: 13px; text-align: center; padding: 20px; line-height: 1.5; }
     .off-msg { color: #888; font-size: 15px; text-align: center; padding: 8px 0 4px; }
+
+    /* ── Collapsible sections ── */
+    .sec-toggle-row { display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent; }
+    .toggle-chev { color:#bbb; font-size:11px; transition:transform .25s; margin-left:6px; flex-shrink:0; }
+    .toggle-chev.open { transform:rotate(180deg); }
+    .coll-body { overflow:hidden; transition:max-height .3s ease; }
+
+    /* ── Team toggle ── */
+    .team-toggle { display:flex; gap:6px; margin-bottom:10px; }
+    .team-btn { flex:1; padding:7px 0; border-radius:10px; border:none; font-size:12px; font-weight:600; cursor:pointer; background:#f0f0f5; color:#666; -webkit-tap-highlight-color:transparent; }
+    .team-btn.active { background:#003087; color:#fff; }
+
+    /* ── Player stats table ── */
+    .ps-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    .ps-table { border-collapse:collapse; font-size:11px; white-space:nowrap; width:100%; }
+    .ps-table th { color:#bbb; font-weight:600; padding:3px 4px; text-align:right; border-bottom:1px solid #f0f0f0; font-size:10px; }
+    .ps-table th:first-child { text-align:left; min-width:72px; }
+    .ps-table td { padding:4px 4px; color:#666; text-align:right; border-top:1px solid #f9f9f9; }
+    .ps-table td:first-child { text-align:left; color:#1c1c1e; font-weight:500; }
+    .ps-total td { border-top:1px solid #e8e8e8 !important; font-weight:700; color:#333; }
+    .ps-sub { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:#bbb; padding:8px 0 4px; }
+
+    /* ── Play-by-play ── */
+    .pbp-play { padding:7px 0; border-top:1px solid #f2f2f2; }
+    .pbp-play:first-child { border-top:none; }
+    .pbp-inn { font-size:10px; color:#bbb; font-weight:700; letter-spacing:.3px; }
+    .pbp-desc { font-size:12px; color:#444; line-height:1.4; margin-top:2px; }
+    .pbp-scoring .pbp-desc { color:#1b7a34; font-weight:600; }
+    .pbp-hr .pbp-desc { color:#c0392b; font-weight:700; }
+    .see-all-btn { display:block; text-align:center; color:#003087; font-size:12px; font-weight:600; padding:8px 0 2px; cursor:pointer; background:none; border:none; width:100%; -webkit-tap-highlight-color:transparent; }
+
+    /* ── Last 5 games list ── */
+    .l5-row { display:flex; align-items:center; gap:8px; padding:9px 0; border-top:1px solid #f2f2f2; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+    .l5-row:first-child { border-top:none; }
+    .l5-left { flex:1; min-width:0; }
+    .l5-opp { font-size:13px; font-weight:600; color:#1c1c1e; }
+    .l5-meta { font-size:11px; color:#aaa; margin-top:1px; }
+    .l5-result { font-size:12px; font-weight:700; padding:4px 9px; border-radius:8px; flex-shrink:0; }
+    .l5-w { background:#e6f9ed; color:#1b7a34; }
+    .l5-l { background:#ffeeed; color:#c0392b; }
+    .l5-chev { color:#ddd; font-size:16px; flex-shrink:0; }
+
+    /* ── Filter pills ── */
+    .filter-row { display:flex; gap:6px; overflow-x:auto; padding:0 0 10px; scrollbar-width:none; }
+    .filter-row::-webkit-scrollbar { display:none; }
+    .fpill { padding:5px 13px; border-radius:14px; font-size:12px; font-weight:600; cursor:pointer; border:none; background:#f0f0f5; color:#666; white-space:nowrap; flex-shrink:0; -webkit-tap-highlight-color:transparent; }
+    .fpill.active { background:#003087; color:#fff; }
+
+    /* ── Overlay / bottom sheet ── */
+    #ov-bd { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:200; opacity:0; pointer-events:none; transition:opacity .25s; }
+    #ov-bd.open { opacity:1; pointer-events:auto; }
+    #ov-sh { position:fixed; left:0; right:0; bottom:0; z-index:201; background:#fff; border-radius:20px 20px 0 0; max-height:90vh; display:flex; flex-direction:column; transform:translateY(102%); transition:transform .3s cubic-bezier(.25,.46,.45,.94); box-shadow:0 -8px 32px rgba(0,0,0,.2); }
+    #ov-sh.open { transform:translateY(0); }
+    .ov-handle { width:36px; height:4px; background:#e0e0e0; border-radius:2px; margin:10px auto 0; flex-shrink:0; }
+    .ov-head { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; flex-shrink:0; }
+    .ov-title { font-size:15px; font-weight:700; color:#1c1c1e; }
+    .ov-close { background:none; border:none; font-size:24px; color:#bbb; cursor:pointer; line-height:1; padding:0 0 2px 16px; }
+    .ov-tabs { display:flex; border-bottom:1px solid #f0f0f0; flex-shrink:0; }
+    .ov-tab { flex:1; padding:10px; font-size:13px; font-weight:600; background:none; border:none; cursor:pointer; color:#aaa; border-bottom:2px solid transparent; -webkit-tap-highlight-color:transparent; }
+    .ov-tab.active { color:#003087; border-bottom-color:#003087; }
+    .ov-body { overflow-y:auto; flex:1; -webkit-overflow-scrolling:touch; }
+    .ov-sec { padding:14px 16px; }
+    .ov-filter-wrap { position:sticky; top:0; background:#fff; padding:8px 16px 0; border-bottom:1px solid #f0f0f0; z-index:1; }
   </style>
 </head>
 <body>
@@ -161,7 +247,35 @@
   <div class="footer">
     <button class="refresh-btn" onclick="load()">Refresh</button>
     <p class="updated" id="updated"></p>
+    <p class="copyright">
+      © 2026 <a href="https://github.com/timtomnow/bluejays-score" target="_blank" rel="noopener">timtomnow</a>
+      <button class="help-btn" onclick="openReadme()" aria-label="About this app">?</button>
+    </p>
   </div>
+</div>
+
+<div id="readme-bd" onclick="closeReadme()"></div>
+<div id="readme-sh">
+  <div class="ov-handle"></div>
+  <div class="readme-head">
+    <div class="readme-title">About this app</div>
+    <button class="readme-close" onclick="closeReadme()">&#x2715;</button>
+  </div>
+  <div class="readme-body" id="readme-body"><div class="loading">Loading…</div></div>
+</div>
+
+<div id="ov-bd" onclick="closeOverlay()"></div>
+<div id="ov-sh">
+  <div class="ov-handle"></div>
+  <div class="ov-head">
+    <div class="ov-title" id="ov-title">Game Details</div>
+    <button class="ov-close" onclick="closeOverlay()">&#x2715;</button>
+  </div>
+  <div class="ov-tabs" id="ov-tabs">
+    <button class="ov-tab active" id="ov-tab-stats" onclick="setOvTab('stats')">Player Stats</button>
+    <button class="ov-tab" id="ov-tab-plays" onclick="setOvTab('plays')">Play-by-Play</button>
+  </div>
+  <div class="ov-body" id="ov-body"></div>
 </div>
 
 <script>
@@ -370,6 +484,222 @@
     return [hand, era ? `${era} ERA` : ''].filter(Boolean).join(' · ');
   }
 
+  // ── Global state ─────────────────────────────────────────────────────────
+  const loadedFeeds = {};
+  const gameInfoCache = {};
+  const ovState = { gamePk: null, feed: null, tab: 'stats', filter: 'all', teamSide: 'away', innings: new Set() };
+
+  // ── Collapsible toggle ────────────────────────────────────────────────────
+  function toggleColl(id, rowEl) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const chev = rowEl?.querySelector('.toggle-chev');
+    const isOpen = el.style.maxHeight && el.style.maxHeight !== '0px';
+    if (isOpen) {
+      el.style.maxHeight = el.scrollHeight + 'px';
+      requestAnimationFrame(() => { el.style.maxHeight = '0'; });
+      if (chev) chev.classList.remove('open');
+    } else {
+      el.style.maxHeight = el.scrollHeight + 'px';
+      if (chev) chev.classList.add('open');
+      setTimeout(() => { if (el.style.maxHeight !== '0px') el.style.maxHeight = 'none'; }, 310);
+    }
+  }
+
+  // ── Switch team stats (inline card) ───────────────────────────────────────
+  function switchTeamStats(gamePk, side) {
+    const aw = document.getElementById(`ps-aw-${gamePk}`);
+    const hm = document.getElementById(`ps-hm-${gamePk}`);
+    const awBtn = document.getElementById(`ps-btn-aw-${gamePk}`);
+    const hmBtn = document.getElementById(`ps-btn-hm-${gamePk}`);
+    if (aw) aw.style.display = side === 'away' ? '' : 'none';
+    if (hm) hm.style.display = side === 'home' ? '' : 'none';
+    if (awBtn) awBtn.classList.toggle('active', side === 'away');
+    if (hmBtn) hmBtn.classList.toggle('active', side === 'home');
+    // recalc collapsible height
+    const coll = aw?.closest('.coll-body');
+    if (coll && coll.style.maxHeight !== '0px') {
+      coll.style.maxHeight = 'none';
+    }
+  }
+
+  // ── Player stats renderer ─────────────────────────────────────────────────
+  function renderPlayerStats(boxscore, side) {
+    const team = boxscore?.teams?.[side];
+    if (!team?.players) return '<div style="color:#aaa;font-size:13px;padding:8px 0">No stats available</div>';
+    const players = team.players;
+    const batters = (team.battingOrder ?? []).map(id => players[`ID${id}`]).filter(Boolean);
+    const pitchers = (team.pitchers ?? []).map(id => players[`ID${id}`]).filter(Boolean);
+
+    let html = '';
+    if (batters.length) {
+      html += `<div class="ps-wrap"><table class="ps-table">
+        <thead><tr><th>Batter</th><th>AB</th><th>R</th><th>H</th><th>RBI</th><th>BB</th><th>K</th></tr></thead>
+        <tbody>`;
+      for (const p of batters) {
+        const b = p.stats?.batting ?? {};
+        const name = p.person?.fullName ?? '';
+        const last = name.split(' ').slice(1).join(' ') || name;
+        const pos = p.position?.abbreviation ?? '';
+        html += `<tr><td>${last}<span style="color:#bbb;font-size:9px;margin-left:3px">${pos}</span></td>
+          <td>${b.atBats ?? 0}</td><td>${b.runs ?? 0}</td><td>${b.hits ?? 0}</td>
+          <td>${b.rbi ?? 0}</td><td>${b.baseOnBalls ?? 0}</td><td>${b.strikeOuts ?? 0}</td></tr>`;
+      }
+      const ts = team.teamStats?.batting;
+      if (ts) {
+        html += `<tr class="ps-total"><td>Total</td>
+          <td>${ts.atBats ?? ''}</td><td>${ts.runs ?? ''}</td><td>${ts.hits ?? ''}</td>
+          <td>${ts.rbi ?? ''}</td><td>${ts.baseOnBalls ?? ''}</td><td>${ts.strikeOuts ?? ''}</td></tr>`;
+      }
+      html += '</tbody></table></div>';
+    }
+    if (pitchers.length) {
+      html += `<div class="ps-sub">Pitching</div>
+        <div class="ps-wrap"><table class="ps-table">
+          <thead><tr><th>Pitcher</th><th>IP</th><th>H</th><th>ER</th><th>BB</th><th>K</th></tr></thead>
+          <tbody>`;
+      for (const p of pitchers) {
+        const pit = p.stats?.pitching ?? {};
+        if (!pit.inningsPitched) continue;
+        const name = p.person?.fullName ?? '';
+        const last = name.split(' ').slice(1).join(' ') || name;
+        html += `<tr><td>${last}</td><td>${pit.inningsPitched}</td><td>${pit.hits ?? 0}</td>
+          <td>${pit.earnedRuns ?? 0}</td><td>${pit.baseOnBalls ?? 0}</td><td>${pit.strikeOuts ?? 0}</td></tr>`;
+      }
+      html += '</tbody></table></div>';
+    }
+    return html || '<div style="color:#aaa;font-size:13px;padding:8px 0">No stats available</div>';
+  }
+
+  // ── Play renderer (shared by inline + overlay) ────────────────────────────
+  function renderPlays(allPlays, limit, filter, innings) {
+    if (!allPlays?.length) return '<div style="color:#aaa;font-size:13px;padding:12px 0;text-align:center">No plays yet</div>';
+    let plays = allPlays.filter(p => p?.about?.isComplete);
+    if (filter === 'hits')       plays = plays.filter(p => ['single','double','triple','home_run'].includes(p.result?.eventType));
+    else if (filter === 'ks')    plays = plays.filter(p => p.result?.eventType === 'strikeout');
+    else if (filter === 'walks') plays = plays.filter(p => ['walk','intent_walk'].includes(p.result?.eventType));
+    else if (filter === 'runs')  plays = plays.filter(p => p.about?.isScoringPlay);
+    if (innings?.size) plays = plays.filter(p => innings.has(p.about?.inning));
+    if (!plays.length) return '<div style="color:#aaa;font-size:13px;padding:12px 0;text-align:center">No plays match this filter</div>';
+    const slice = limit ? plays.slice(-limit) : plays;
+    return [...slice].reverse().map(p => {
+      const half = p.about?.halfInning === 'top' ? '▲' : '▼';
+      const inn = p.about?.inning ?? '';
+      const isHR = p.result?.eventType === 'home_run';
+      const isScore = p.about?.isScoringPlay;
+      const cls = isHR ? ' pbp-hr' : isScore ? ' pbp-scoring' : '';
+      return `<div class="pbp-play${cls}">
+        <div class="pbp-inn">${half}&nbsp;${inn}</div>
+        <div class="pbp-desc">${p.result?.description ?? ''}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Overlay ───────────────────────────────────────────────────────────────
+  async function openGameOverlay(gamePk, tab) {
+    ovState.gamePk = gamePk;
+    ovState.tab = tab || 'stats';
+    ovState.filter = 'all';
+    ovState.teamSide = 'away';
+    ovState.innings = new Set();
+
+    const info = gameInfoCache[gamePk];
+    document.getElementById('ov-title').textContent = info?.title ?? 'Game Details';
+    document.getElementById('ov-body').innerHTML = '<div class="loading" style="padding:40px">Loading…</div>';
+
+    document.getElementById('ov-bd').classList.add('open');
+    document.getElementById('ov-sh').classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    if (!loadedFeeds[gamePk]) {
+      try { loadedFeeds[gamePk] = await fetchGameFeed(gamePk); }
+      catch(e) {
+        document.getElementById('ov-body').innerHTML = `<div class="err" style="padding:20px">Could not load game data.<br>${e.message}</div>`;
+        return;
+      }
+    }
+    ovState.feed = loadedFeeds[gamePk];
+    renderOvContent();
+  }
+
+  function closeOverlay() {
+    document.getElementById('ov-bd').classList.remove('open');
+    document.getElementById('ov-sh').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function setOvTab(tab) {
+    ovState.tab = tab;
+    renderOvContent();
+  }
+
+  function setOvFilter(filter) {
+    ovState.filter = filter;
+    renderOvContent();
+  }
+
+  function setOvInning(inn) {
+    if (ovState.innings.has(inn)) ovState.innings.delete(inn);
+    else ovState.innings.add(inn);
+    renderOvContent();
+  }
+
+  function setOvTeam(side) {
+    ovState.teamSide = side;
+    renderOvContent();
+  }
+
+  function renderOvContent() {
+    // Update tab buttons
+    document.getElementById('ov-tab-stats').classList.toggle('active', ovState.tab === 'stats');
+    document.getElementById('ov-tab-plays').classList.toggle('active', ovState.tab === 'plays');
+
+    const feed = ovState.feed;
+    const boxscore = feed?.liveData?.boxscore;
+    const allPlays = feed?.liveData?.plays?.allPlays ?? [];
+
+    let html = '';
+    if (ovState.tab === 'stats') {
+      const awAb = abbr(feed?.gameData?.teams?.away) || 'Away';
+      const hmAb = abbr(feed?.gameData?.teams?.home) || 'Home';
+      html = `<div class="ov-sec">
+        <div class="team-toggle">
+          <button class="team-btn ${ovState.teamSide === 'away' ? 'active' : ''}" onclick="setOvTeam('away')">${awAb}</button>
+          <button class="team-btn ${ovState.teamSide === 'home' ? 'active' : ''}" onclick="setOvTeam('home')">${hmAb}</button>
+        </div>
+        ${renderPlayerStats(boxscore, ovState.teamSide)}
+      </div>`;
+    } else {
+      const filters = [
+        { id:'all', label:'All' },
+        { id:'hits', label:'Hits' },
+        { id:'ks', label:'Strikeouts' },
+        { id:'walks', label:'Walks' },
+        { id:'runs', label:'Scoring' },
+      ];
+      const typePills = filters.map(f =>
+        `<button class="fpill ${f.id === ovState.filter ? 'active' : ''}" onclick="setOvFilter('${f.id}')">${f.label}</button>`
+      ).join('');
+
+      // Build inning pills from available innings in completed plays
+      const completedPlays = allPlays.filter(p => p?.about?.isComplete);
+      const availableInnings = [...new Set(completedPlays.map(p => p.about?.inning).filter(Boolean))].sort((a,b) => a-b);
+      const inningPills = availableInnings.map(inn =>
+        `<button class="fpill ${ovState.innings.has(inn) ? 'active' : ''}" onclick="setOvInning(${inn})">${inn}</button>`
+      ).join('');
+
+      html = `<div class="ov-filter-wrap">
+          <div class="filter-row" style="padding-bottom:6px">${typePills}</div>
+          ${inningPills ? `<div style="display:flex;align-items:center;gap:6px;padding-bottom:10px">
+            <span style="font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.4px;flex-shrink:0">Inn</span>
+            <div class="filter-row" style="padding:0">${inningPills}</div>
+          </div>` : ''}
+        </div>
+        <div class="ov-sec">${renderPlays(allPlays, 0, ovState.filter, ovState.innings)}</div>`;
+    }
+    document.getElementById('ov-body').innerHTML = html;
+  }
+
   // ── Game card ─────────────────────────────────────────────────────────────
 
   function renderGame(g, feed) {
@@ -521,6 +851,51 @@
       </div>`;
     }
 
+    // ── Player stats (live + final) ──
+    if ((isLive || isFinal) && feed?.liveData?.boxscore) {
+      const bs = feed.liveData.boxscore;
+      const awAb2 = awAbbr;
+      const hmAb2 = hmAbbr;
+      const collId = `coll-ps-${g.gamePk}`;
+      html += `<div class="sec">
+        <div class="sec-toggle-row" onclick="toggleColl('${collId}', this)">
+          <span class="sec-title" style="margin-bottom:0">Player Stats</span>
+          <span class="toggle-chev">▼</span>
+        </div>
+        <div id="${collId}" class="coll-body" style="max-height:0">
+          <div style="padding-top:10px;padding-bottom:4px">
+            <div class="team-toggle">
+              <button class="team-btn active" id="ps-btn-aw-${g.gamePk}" onclick="switchTeamStats(${g.gamePk},'away')">${awAb2}</button>
+              <button class="team-btn" id="ps-btn-hm-${g.gamePk}" onclick="switchTeamStats(${g.gamePk},'home')">${hmAb2}</button>
+            </div>
+            <div id="ps-aw-${g.gamePk}">${renderPlayerStats(bs, 'away')}</div>
+            <div id="ps-hm-${g.gamePk}" style="display:none">${renderPlayerStats(bs, 'home')}</div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // ── Play-by-play (live: last 5 inline + see all; final: link only) ──
+    if (isLive && feed?.liveData?.plays?.allPlays?.length) {
+      const collId2 = `coll-pbp-${g.gamePk}`;
+      html += `<div class="sec">
+        <div class="sec-toggle-row" onclick="toggleColl('${collId2}', this)">
+          <span class="sec-title" style="margin-bottom:0">Recent Plays</span>
+          <span class="toggle-chev">▼</span>
+        </div>
+        <div id="${collId2}" class="coll-body" style="max-height:0">
+          <div style="padding-top:4px">
+            ${renderPlays(feed.liveData.plays.allPlays, 5, 'all')}
+            <button class="see-all-btn" onclick="openGameOverlay(${g.gamePk},'plays')">See all plays →</button>
+          </div>
+        </div>
+      </div>`;
+    } else if (isFinal && feed?.liveData?.plays?.allPlays?.length) {
+      html += `<div class="sec">
+        <button class="see-all-btn" onclick="openGameOverlay(${g.gamePk},'plays')">View Play-by-Play →</button>
+      </div>`;
+    }
+
     // ── Venue + broadcasts ──
     const venue = g.venue?.name;
     const bcHtml = broadcasts(g.broadcasts);
@@ -538,7 +913,7 @@
 
   // ── Season card ───────────────────────────────────────────────────────────
 
-  function renderSeason(standings, recentData) {
+  function renderSeason(standings) {
     let jaysRec = null;
     let divRows = [];
 
@@ -550,26 +925,8 @@
       }
     }
 
-    // Parse recent completed games for W/L dots
-    const completed = [];
-    for (const d of recentData?.dates ?? []) {
-      for (const g of d.games ?? []) {
-        if (g.status?.abstractGameState !== 'Final') continue;
-        const aw = g.teams?.away, hm = g.teams?.home;
-        const jAway = aw?.team?.id === TEAM_ID;
-        const jScore = jAway ? aw?.score : hm?.score;
-        const oScore = jAway ? hm?.score : aw?.score;
-        if (jScore !== undefined && oScore !== undefined) {
-          completed.push({ win: jScore > oScore, date: d.date });
-        }
-      }
-    }
-    completed.sort((a,b) => a.date < b.date ? -1 : 1);
-    const last10 = completed.slice(-10);
-
     let html = '';
 
-    // Record + streak + division rank
     if (jaysRec) {
       const streak = jaysRec.streak?.streakCode ?? '';
       const sCls   = streak.startsWith('W') ? 's-w' : 's-l';
@@ -584,18 +941,6 @@
       </div>`;
     }
 
-    // Last 10 results
-    if (last10.length) {
-      const dots = last10.map(g =>
-        `<div class="r10-dot r10-${g.win ? 'w' : 'l'}">${g.win ? 'W' : 'L'}</div>`
-      ).join('');
-      html += `<div class="sec">
-        <div class="sec-title">Last ${last10.length} Games</div>
-        <div class="r10-dots">${dots}</div>
-      </div>`;
-    }
-
-    // AL East standings
     if (divRows.length) {
       const rows = divRows.map(r => {
         const gb  = r.gamesBack === '-' ? '—' : (r.gamesBack ?? '—');
@@ -621,49 +966,105 @@
     return html ? `<div class="card">${html}</div>` : '';
   }
 
-  // ── Upcoming games ────────────────────────────────────────────────────────
+  // ── Bottom card: Last 5 + Upcoming ───────────────────────────────────────
 
-  function renderUpcoming(upcomingData) {
-    const games = [];
+  function renderBottomCard(recentData, upcomingData) {
+    // ── Parse last 5 completed games ──
+    const completed = [];
+    for (const d of recentData?.dates ?? []) {
+      for (const g of d.games ?? []) {
+        if (g.status?.abstractGameState !== 'Final') continue;
+        const aw = g.teams?.away, hm = g.teams?.home;
+        const jAway = aw?.team?.id === TEAM_ID;
+        const jScore = jAway ? aw?.score : hm?.score;
+        const oScore = jAway ? hm?.score : aw?.score;
+        if (jScore !== undefined && oScore !== undefined) {
+          completed.push({
+            win: jScore > oScore, date: d.date, gamePk: g.gamePk,
+            jScore, oScore, jaysAway: jAway,
+            awTeam: aw?.team, hmTeam: hm?.team,
+          });
+        }
+      }
+    }
+    completed.sort((a,b) => a.date < b.date ? -1 : 1);
+    const last5 = completed.slice(-5);
+
+    // Store in cache for overlay use
+    for (const gm of last5) {
+      const oppTeam = gm.jaysAway ? gm.hmTeam : gm.awTeam;
+      const oppAb = abbr(oppTeam);
+      const d = new Date(gm.date + 'T12:00:00');
+      const dateStr = d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
+      gameInfoCache[gm.gamePk] = {
+        title: `${gm.jaysAway ? 'TOR @ ' + oppAb : oppAb + ' @ TOR'} · ${dateStr}`,
+      };
+    }
+
+    let html = '';
+
+    // ── Last 5 games section ──
+    if (last5.length) {
+      const rows = [...last5].reverse().map(gm => {
+        const oppTeam = gm.jaysAway ? gm.hmTeam : gm.awTeam;
+        const ha = gm.jaysAway ? '@ ' : 'vs ';
+        const oppName = oppTeam?.teamName ?? oppTeam?.name ?? '—';
+        const d = new Date(gm.date + 'T12:00:00');
+        const dateStr = d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
+        const resCls = gm.win ? 'l5-w' : 'l5-l';
+        const resLabel = `${gm.win ? 'W' : 'L'} ${gm.jScore}–${gm.oScore}`;
+        return `<div class="l5-row" onclick="openGameOverlay(${gm.gamePk},'stats')">
+          <div class="l5-left">
+            <div class="l5-opp">${ha}${oppName}</div>
+            <div class="l5-meta">${dateStr}</div>
+          </div>
+          <div class="l5-result ${resCls}">${resLabel}</div>
+          <span class="l5-chev">›</span>
+        </div>`;
+      }).join('');
+      html += `<div class="sec">
+        <div class="sec-title">Last 5 Games</div>
+        ${rows}
+      </div>`;
+    }
+
+    // ── Upcoming games section ──
+    const upcoming = [];
     for (const d of upcomingData?.dates ?? []) {
       for (const g of d.games ?? []) {
-        games.push({ date: d.date, game: g });
-        if (games.length >= 3) break;
+        upcoming.push({ date: d.date, game: g });
+        if (upcoming.length >= 3) break;
       }
-      if (games.length >= 3) break;
+      if (upcoming.length >= 3) break;
     }
-    if (!games.length) return '';
 
-    const rows = games.map(({ date, game }) => {
-      const aw = game.teams?.away;
-      const hm = game.teams?.home;
-      const jaysAway = aw?.team?.id === TEAM_ID;
-      const opp = jaysAway ? hm?.team : aw?.team;
-      const ha  = jaysAway ? '@ ' : 'vs ';
-      const oppName = opp?.teamName ?? opp?.name ?? '—';
-      const d = new Date(date + 'T12:00:00'); // noon local to avoid TZ edge cases
-      const dateStr = d.toLocaleDateString('en-CA', { weekday: 'short', month: 'short', day: 'numeric' });
-      const timeStr = fmtTime(game.gameDate);
-      const awPP = aw?.probablePitcher?.fullName;
-      const hmPP = hm?.probablePitcher?.fullName;
-      const jaysPP = jaysAway ? awPP : hmPP;
-      const oppPP  = jaysAway ? hmPP : awPP;
-
-      return `<div class="sec" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-        <div>
+    if (upcoming.length) {
+      const upRows = upcoming.map(({ date, game }) => {
+        const aw = game.teams?.away;
+        const hm = game.teams?.home;
+        const jaysAway = aw?.team?.id === TEAM_ID;
+        const opp = jaysAway ? hm?.team : aw?.team;
+        const ha  = jaysAway ? '@ ' : 'vs ';
+        const oppName = opp?.teamName ?? opp?.name ?? '—';
+        const d = new Date(date + 'T12:00:00');
+        const dateStr = d.toLocaleDateString('en-CA', { weekday: 'short', month: 'short', day: 'numeric' });
+        const timeStr = fmtTime(game.gameDate);
+        const awPP = aw?.probablePitcher?.fullName;
+        const hmPP = hm?.probablePitcher?.fullName;
+        const jaysPP = jaysAway ? awPP : hmPP;
+        const oppPP  = jaysAway ? hmPP : awPP;
+        return `<div class="sec">
           <div style="font-size:13px;font-weight:700;color:#1c1c1e">${ha}${oppName}</div>
           <div style="font-size:11px;color:#aaa;margin-top:2px">${dateStr}${timeStr ? ' · ' + timeStr : ''}</div>
           ${(jaysPP || oppPP) ? `<div style="font-size:11px;color:#bbb;margin-top:3px">
-            ${jaysPP ? `TOR: ${jaysPP}` : ''}${jaysPP && oppPP ? ' &nbsp;·&nbsp; ' : ''}${oppPP ? `${abbr(opp)}: ${oppPP}` : ''}
+            ${jaysPP ? `TOR: ${jaysPP}` : ''}${jaysPP && oppPP ? '&nbsp;·&nbsp;' : ''}${oppPP ? `${abbr(opp)}: ${oppPP}` : ''}
           </div>` : ''}
-        </div>
-      </div>`;
-    }).join('');
+        </div>`;
+      }).join('');
+      html += `<div class="sec" style="padding-bottom:4px"><div class="sec-title">Upcoming Games</div></div>${upRows}`;
+    }
 
-    return `<div class="card">
-      <div class="sec"><div class="sec-title">Upcoming Games</div></div>
-      ${rows}
-    </div>`;
+    return html ? `<div class="card">${html}</div>` : '';
   }
 
   // ── Main load ─────────────────────────────────────────────────────────────
@@ -687,10 +1088,11 @@
 
       const games = scheduleData.dates?.[0]?.games ?? [];
 
-      // Fetch live game feeds in parallel
-      const liveGames = games.filter(g => g.status?.abstractGameState === 'Live');
-      const feeds     = await Promise.all(liveGames.map(g => fetchGameFeed(g.gamePk).catch(() => null)));
-      const feedMap   = Object.fromEntries(liveGames.map((g, i) => [g.gamePk, feeds[i]]));
+      // Fetch feeds for live and final games (need boxscore + plays)
+      const feedGames = games.filter(g => ['Live','Final'].includes(g.status?.abstractGameState));
+      const feedResults = await Promise.all(feedGames.map(g => fetchGameFeed(g.gamePk).catch(() => null)));
+      feedGames.forEach((g, i) => { if (feedResults[i]) loadedFeeds[g.gamePk] = feedResults[i]; });
+      const feedMap = Object.fromEntries(feedGames.map((g, i) => [g.gamePk, feedResults[i]]));
 
       if (!games.length) {
         gameEl.innerHTML = `<div class="card">
@@ -703,8 +1105,8 @@
         gameEl.innerHTML = games.map(g => renderGame(g, feedMap[g.gamePk] ?? null)).join('');
       }
 
-      seasonEl.innerHTML = renderSeason(standingsData, recentData);
-      document.getElementById('upcoming-section').innerHTML = renderUpcoming(upcomingData);
+      seasonEl.innerHTML = renderSeason(standingsData);
+      document.getElementById('upcoming-section').innerHTML = renderBottomCard(recentData, upcomingData);
 
       document.getElementById('updated').textContent =
         'Updated at ' + new Date().toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' });
@@ -712,6 +1114,69 @@
     } catch (e) {
       gameEl.innerHTML = `<div class="card"><div class="err">Could not load data.<br>${e.message}</div></div>`;
     }
+  }
+
+  // ── README overlay ────────────────────────────────────────────────────────
+
+  function githubRawUrl() {
+    const { hostname, pathname } = window.location;
+    if (hostname.endsWith('.github.io')) {
+      const user = hostname.replace('.github.io', '');
+      const repo = pathname.split('/').filter(Boolean)[0] ?? '';
+      if (repo) return `https://raw.githubusercontent.com/${user}/${repo}/main/README.md`;
+    }
+    return null;
+  }
+
+  function parseMarkdown(md) {
+    return md
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+      .replace(/^- (.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>[\s\S]*?<\/li>)(\n(?!<li>))/g, '<ul>$1</ul>\n')
+      .replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`)
+      .replace(/\n\n+/g, '</p><p>')
+      .replace(/^(?!<[hup])/gm, '')
+      .replace(/<\/ul><ul>/g, '')
+      .replace(/(<p>|<\/p>)+/g, m => m.length > 4 ? '<p>' : m);
+  }
+
+  async function openReadme() {
+    document.getElementById('readme-bd').classList.add('open');
+    document.getElementById('readme-sh').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    const bodyEl = document.getElementById('readme-body');
+    bodyEl.innerHTML = '<div class="loading">Loading…</div>';
+    try {
+      let md = null;
+      // Try relative path first (works on any proper web server)
+      try {
+        const r = await fetch('./README.md');
+        if (r.ok) md = await r.text();
+      } catch(_) {}
+      // Fall back to raw GitHub URL (handles file:// and other edge cases)
+      if (!md) {
+        const fallback = githubRawUrl();
+        if (!fallback) throw new Error('README could not be loaded');
+        const r = await fetch(fallback);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        md = await r.text();
+      }
+      bodyEl.innerHTML = parseMarkdown(md);
+    } catch(e) {
+      bodyEl.innerHTML = `<div class="err">Could not load README.<br>${e.message}</div>`;
+    }
+  }
+
+  function closeReadme() {
+    document.getElementById('readme-bd').classList.remove('open');
+    document.getElementById('readme-sh').classList.remove('open');
+    document.body.style.overflow = '';
   }
 
   // Self-rescheduling refresh: 30 s live, 60 s scheduled, 5 min off-day

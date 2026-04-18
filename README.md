@@ -18,16 +18,32 @@ A lightweight web app for tracking the Toronto Blue Jays — live score, game si
 - TV/radio broadcast listings
 - Handles off days and doubleheaders
 
+**Player stats**
+- Collapsible player stats section for any live or completed game
+- Toggle between away and home team
+- Batting stats: AB, R, H, RBI, BB, K with team totals
+- Pitching stats: IP, H, ER, BB, K per pitcher in appearance order
+
+**Play-by-play**
+- Live games show the last 5 plays inline (collapsible)
+- "See all plays" opens a full play-by-play overlay for any game
+- Filter plays by type: All, Hits, Strikeouts, Walks, Scoring
+- Multi-select inning filter to focus on specific innings
+
 **Season context**
 - Season record, winning %, and current streak
-- Last 10 game results (W/L dots)
 - Full AL East standings with games back and streak
+- Last 5 completed games (W/L, score, opponent) — each clickable for full game stats and play-by-play
 - Next 3 upcoming scheduled games with date, time, and probable starters
 
 **Auto-refresh**
 - Every 30 seconds during live games
 - Every 60 seconds when a game is scheduled (to catch first pitch)
 - Every 5 minutes on off days
+
+## In-app help
+
+A **?** icon in the app footer loads this README file directly from GitHub, so any updates to the docs are always reflected in the app without a redeploy.
 
 ## Install on your phone
 
@@ -50,4 +66,4 @@ Fetches data from the free [MLB Stats API](https://statsapi.mlb.com) — no API 
 
 ## License
 
-MIT
+MIT — © 2026 timtomnow
