@@ -193,7 +193,21 @@
     .pbp-desc { font-size:12px; color:#444; line-height:1.4; margin-top:2px; }
     .pbp-scoring .pbp-desc { color:#1b7a34; font-weight:600; }
     .pbp-hr .pbp-desc { color:#c0392b; font-weight:700; }
+    .pbp-jays .pbp-inn { color:#003087; }
+    .pbp-opp  .pbp-inn { color:#e04820; }
     .see-all-btn { display:block; text-align:center; color:#003087; font-size:12px; font-weight:600; padding:8px 0 2px; cursor:pointer; background:none; border:none; width:100%; -webkit-tap-highlight-color:transparent; }
+
+    /* ── Other games card ── */
+    .og-row { display:flex; align-items:center; padding:6px 0; border-top:1px solid #f2f2f2; gap:6px; }
+    .og-row:first-child { border-top:none; }
+    .og-team { font-size:11px; font-weight:700; color:#1c1c1e; width:30px; flex-shrink:0; }
+    .og-score { font-size:13px; font-weight:700; color:#1c1c1e; min-width:12px; text-align:center; }
+    .og-dash { font-size:11px; color:#ccc; }
+    .og-mid { display:flex; align-items:center; gap:4px; flex:1; }
+    .og-status { margin-left:auto; font-size:10px; font-weight:700; flex-shrink:0; white-space:nowrap; }
+    .og-live  { color:#ff3b30; }
+    .og-final { color:#999; font-weight:600; }
+    .og-pre   { color:#34c759; }
 
     /* ── Last 5 games list ── */
     .l5-row { display:flex; align-items:center; gap:8px; padding:9px 0; border-top:1px solid #f2f2f2; cursor:pointer; -webkit-tap-highlight-color:transparent; }
@@ -242,10 +256,11 @@
 
   <div id="game-section"><div class="card"><div class="loading">Loading…</div></div></div>
   <div id="season-section"></div>
+  <div id="other-games-section"></div>
   <div id="upcoming-section"></div>
 
   <div class="footer">
-    <button class="refresh-btn" onclick="load()">Refresh</button>
+    <button class="refresh-btn" onclick="manualRefresh()">Refresh</button>
     <p class="updated" id="updated"></p>
     <p class="copyright">
       © 2026 <a href="https://github.com/timtomnow/bluejays-score" target="_blank" rel="noopener">timtomnow</a>
@@ -367,6 +382,13 @@
     return get(`https://statsapi.mlb.com/api/v1.1/game/${pk}/feed/live`);
   }
 
+  function fetchAllGamesForDate(date) {
+    return get(
+      `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${date}` +
+      `&hydrate=linescore,team`
+    );
+  }
+
   // ── SVG Diamond ──────────────────────────────────────────────────────────
 
   function diamond(offense) {
@@ -418,7 +440,7 @@
 
   // ── Line score ────────────────────────────────────────────────────────────
 
-  function lineScore(ls, awAbbr, hmAbbr, liveInning) {
+  function lineScore(ls, awAbbr, hmAbbr, liveInning, isTopInning) {
     if (!ls?.innings?.length) return '';
     const total = Math.max(9, ls.innings.length);
     const cols  = Array.from({length: total}, (_, i) => i + 1);
@@ -427,7 +449,8 @@
       const inn = ls.innings.find(x => x.num === num);
       if (!inn) return `<td>-</td>`;
       const val = inn[side]?.runs;
-      const cur = liveInning === num ? ' class="cur"' : '';
+      const isBatting = (side === 'away' && isTopInning) || (side === 'home' && !isTopInning);
+      const cur = (liveInning === num && isBatting) ? ' class="cur"' : '';
       return `<td${cur}>${val !== undefined ? val : '-'}</td>`;
     }
 
@@ -556,7 +579,7 @@
     if (pitchers.length) {
       html += `<div class="ps-sub">Pitching</div>
         <div class="ps-wrap"><table class="ps-table">
-          <thead><tr><th>Pitcher</th><th>IP</th><th>H</th><th>ER</th><th>BB</th><th>K</th></tr></thead>
+          <thead><tr><th>Pitcher</th><th>IP</th><th>H</th><th>ER</th><th>BB</th><th>K</th><th>PC</th></tr></thead>
           <tbody>`;
       for (const p of pitchers) {
         const pit = p.stats?.pitching ?? {};
@@ -564,7 +587,8 @@
         const name = p.person?.fullName ?? '';
         const last = name.split(' ').slice(1).join(' ') || name;
         html += `<tr><td>${last}</td><td>${pit.inningsPitched}</td><td>${pit.hits ?? 0}</td>
-          <td>${pit.earnedRuns ?? 0}</td><td>${pit.baseOnBalls ?? 0}</td><td>${pit.strikeOuts ?? 0}</td></tr>`;
+          <td>${pit.earnedRuns ?? 0}</td><td>${pit.baseOnBalls ?? 0}</td><td>${pit.strikeOuts ?? 0}</td>
+          <td>${pit.numberOfPitches ?? 0}</td></tr>`;
       }
       html += '</tbody></table></div>';
     }
@@ -572,7 +596,7 @@
   }
 
   // ── Play renderer (shared by inline + overlay) ────────────────────────────
-  function renderPlays(allPlays, limit, filter, innings) {
+  function renderPlays(allPlays, limit, filter, innings, jaysAway) {
     if (!allPlays?.length) return '<div style="color:#aaa;font-size:13px;padding:12px 0;text-align:center">No plays yet</div>';
     let plays = allPlays.filter(p => p?.about?.isComplete);
     if (filter === 'hits')       plays = plays.filter(p => ['single','double','triple','home_run'].includes(p.result?.eventType));
@@ -588,7 +612,13 @@
       const isHR = p.result?.eventType === 'home_run';
       const isScore = p.about?.isScoringPlay;
       const cls = isHR ? ' pbp-hr' : isScore ? ' pbp-scoring' : '';
-      return `<div class="pbp-play${cls}">
+      let teamCls = '';
+      if (jaysAway !== undefined) {
+        const jaysAreTop = jaysAway;
+        const jaysAreBatting = (p.about?.halfInning === 'top') === jaysAreTop;
+        teamCls = jaysAreBatting ? ' pbp-jays' : ' pbp-opp';
+      }
+      return `<div class="pbp-play${cls}${teamCls}">
         <div class="pbp-inn">${half}&nbsp;${inn}</div>
         <div class="pbp-desc">${p.result?.description ?? ''}</div>
       </div>`;
@@ -695,7 +725,7 @@
             <div class="filter-row" style="padding:0">${inningPills}</div>
           </div>` : ''}
         </div>
-        <div class="ov-sec">${renderPlays(allPlays, 0, ovState.filter, ovState.innings)}</div>`;
+        <div class="ov-sec">${renderPlays(allPlays, 0, ovState.filter, ovState.innings, feed?.gameData?.teams?.away?.id === TEAM_ID)}</div>`;
     }
     document.getElementById('ov-body').innerHTML = html;
   }
@@ -735,10 +765,12 @@
 
     // Prefer live feed linescore for count/runners (more real-time)
     const fls     = feed?.liveData?.linescore ?? ls;
-    const offense = fls?.offense ?? ls?.offense;
-    const balls   = fls?.balls   ?? 0;
-    const strikes = fls?.strikes ?? 0;
     const outs    = fls?.outs    ?? 0;
+    // At 3 outs the half-inning is over — clear count and bases
+    const inningOver = outs >= 3;
+    const offense = inningOver ? null : (fls?.offense ?? ls?.offense);
+    const balls   = inningOver ? 0 : (fls?.balls   ?? 0);
+    const strikes = inningOver ? 0 : (fls?.strikes ?? 0);
 
     // ── Score header ──
     let html = `<div class="sec">
@@ -793,11 +825,31 @@
         const lastDesc = cp.result?.description;
 
         if (batter || pitcher) {
+          const isTop = fls?.isTopInning ?? true;
+          const jaysColor = '#003087';
+          const oppColor  = '#c0392b';
+          const awayColor = jaysAway ? jaysColor : oppColor;
+          const homeColor = jaysAway ? oppColor  : jaysColor;
+          // Away always on left, home always on right; role flips by half-inning
+          const awayName = isTop ? batter  : pitcher;
+          const awayHand = isTop ? (batHand ? `${batHand}HB` : '') : (pitHand ? `${pitHand}HP` : '');
+          const awayRole = isTop ? 'Batting' : 'Pitching';
+          const homeName = isTop ? pitcher : batter;
+          const homeHand = isTop ? (pitHand ? `${pitHand}HP` : '') : (batHand ? `${batHand}HB` : '');
+          const homeRole = isTop ? 'Pitching' : 'Batting';
           html += `<div class="sec">
-            <div class="matchup">
-              ${batter  ? `<strong>${batter}</strong>${batHand  ? ` (${batHand}HB)` : ''}` : ''}
-              ${batter && pitcher ? ` <span style="color:#ddd">vs</span> ` : ''}
-              ${pitcher ? `<strong>${pitcher}</strong>${pitHand ? ` (${pitHand}HP)` : ''}` : ''}
+            <div style="display:flex;align-items:flex-start;gap:4px">
+              <div style="flex:1;text-align:left">
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#bbb;margin-bottom:2px">${awAbbr}</div>
+                <div style="font-size:13px;font-weight:600;color:${awayColor}">${awayName ?? '—'}${awayHand ? `<span style="font-size:10px;color:#aaa;font-weight:400"> (${awayHand})</span>` : ''}</div>
+                <div style="font-size:10px;color:#aaa;margin-top:1px">${awayRole}</div>
+              </div>
+              <div style="font-size:11px;color:#ddd;padding:14px 4px 0">vs</div>
+              <div style="flex:1;text-align:right">
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#bbb;margin-bottom:2px">${hmAbbr}</div>
+                <div style="font-size:13px;font-weight:600;color:${homeColor}">${homeName ?? '—'}${homeHand ? `<span style="font-size:10px;color:#aaa;font-weight:400"> (${homeHand})</span>` : ''}</div>
+                <div style="font-size:10px;color:#aaa;margin-top:1px">${homeRole}</div>
+              </div>
             </div>
             ${lastDesc ? `<div class="last-play">${lastDesc}</div>` : ''}
           </div>`;
@@ -844,10 +896,11 @@
 
     // ── Line score (live + final) ──
     if ((isLive || isFinal) && ls?.innings?.length) {
-      const liveInn = isLive ? ls.currentInning : null;
+      const liveInn = isLive ? (fls?.currentInning ?? ls.currentInning) : null;
+      const isTopInn = fls?.isTopInning ?? false;
       html += `<div class="sec">
         <div class="sec-title">Line Score</div>
-        ${lineScore(ls, awAbbr, hmAbbr, liveInn)}
+        ${lineScore(ls, awAbbr, hmAbbr, liveInn, isTopInn)}
       </div>`;
     }
 
@@ -885,7 +938,7 @@
         </div>
         <div id="${collId2}" class="coll-body" style="max-height:0">
           <div style="padding-top:4px">
-            ${renderPlays(feed.liveData.plays.allPlays, 5, 'all')}
+            ${renderPlays(feed.liveData.plays.allPlays, 5, 'all', null, jaysAway)}
             <button class="see-all-btn" onclick="openGameOverlay(${g.gamePk},'plays')">See all plays →</button>
           </div>
         </div>
@@ -1067,6 +1120,92 @@
     return html ? `<div class="card">${html}</div>` : '';
   }
 
+  // ── Other MLB Games Today ────────────────────────────────────────────────
+
+  function renderOtherGames(allGamesData) {
+    const games = allGamesData?.dates?.[0]?.games ?? [];
+    const others = games.filter(g =>
+      g.teams?.away?.team?.id !== TEAM_ID &&
+      g.teams?.home?.team?.id !== TEAM_ID
+    );
+    if (!others.length) return '';
+
+    const stateOrder = { Live: 0, Final: 1, Preview: 2 };
+    others.sort((a, b) => {
+      const ao = stateOrder[a.status?.abstractGameState] ?? 3;
+      const bo = stateOrder[b.status?.abstractGameState] ?? 3;
+      return ao !== bo ? ao - bo : (a.gameDate ?? '').localeCompare(b.gameDate ?? '');
+    });
+
+    const rows = others.map(g => {
+      const state = g.status?.abstractGameState;
+      const aw = g.teams?.away;
+      const hm = g.teams?.home;
+      const awAb = abbr(aw?.team);
+      const hmAb = abbr(hm?.team);
+      const isLiveG   = state === 'Live';
+      const isFinalG  = state === 'Final';
+      const isPreviewG = !isLiveG && !isFinalG;
+
+      let statusHtml;
+      if (isLiveG) {
+        const inn = inningStr(g.linescore);
+        statusHtml = `<span class="og-status og-live">${inn || 'Live'}</span>`;
+      } else if (isFinalG) {
+        statusHtml = `<span class="og-status og-final">Final</span>`;
+      } else {
+        statusHtml = `<span class="og-status og-pre">${fmtTime(g.gameDate)}</span>`;
+      }
+
+      const showScore = isLiveG || isFinalG;
+      return `<div class="og-row">
+        <span class="og-team">${awAb}</span>
+        <div class="og-mid">
+          ${showScore ? `<span class="og-score">${aw?.score ?? 0}</span><span class="og-dash">–</span><span class="og-score">${hm?.score ?? 0}</span>` : '<span class="og-dash" style="flex:1;text-align:center">@</span>'}
+        </div>
+        <span class="og-team" style="text-align:right">${hmAb}</span>
+        ${statusHtml}
+      </div>`;
+    }).join('');
+
+    const collId = 'coll-other-games';
+    return `<div class="card"><div class="sec">
+      <div class="sec-toggle-row" onclick="toggleColl('${collId}', this)">
+        <span class="sec-title" style="margin-bottom:0">Other MLB Games Today</span>
+        <span class="toggle-chev">▼</span>
+      </div>
+      <div id="${collId}" class="coll-body" style="max-height:0">
+        <div style="padding-top:4px">${rows}</div>
+      </div>
+    </div></div>`;
+  }
+
+  // ── Collapsible state helpers (for refresh preservation) ──────────────────
+
+  function getExpandedSections() {
+    return Array.from(document.querySelectorAll('.coll-body'))
+      .filter(el => el.style.maxHeight && el.style.maxHeight !== '0px')
+      .map(el => el.id)
+      .filter(Boolean);
+  }
+
+  function restoreExpandedSections(ids) {
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      el.style.maxHeight = 'none';
+      const rowEl = el.previousElementSibling;
+      const chev = rowEl?.querySelector?.('.toggle-chev');
+      if (chev) chev.classList.add('open');
+    }
+  }
+
+  async function manualRefresh() {
+    const expanded = getExpandedSections();
+    await load();
+    restoreExpandedSections(expanded);
+  }
+
   // ── Main load ─────────────────────────────────────────────────────────────
 
   async function load() {
@@ -1079,11 +1218,12 @@
     });
 
     try {
-      const [scheduleData, standingsData, recentData, upcomingData] = await Promise.all([
+      const [scheduleData, standingsData, recentData, upcomingData, allGamesData] = await Promise.all([
         fetchSchedule(localDate()),
         fetchStandings().catch(() => null),
         fetchRecentGames().catch(() => null),
         fetchUpcomingGames().catch(() => null),
+        fetchAllGamesForDate(localDate()).catch(() => null),
       ]);
 
       const games = scheduleData.dates?.[0]?.games ?? [];
@@ -1106,6 +1246,7 @@
       }
 
       seasonEl.innerHTML = renderSeason(standingsData);
+      document.getElementById('other-games-section').innerHTML = renderOtherGames(allGamesData);
       document.getElementById('upcoming-section').innerHTML = renderBottomCard(recentData, upcomingData);
 
       document.getElementById('updated').textContent =
@@ -1184,7 +1325,12 @@
     const isLive    = !!document.querySelector('.b-live');
     const isPreview = !!document.querySelector('.b-preview');
     const delay = isLive ? 30_000 : isPreview ? 60_000 : 300_000;
-    setTimeout(async () => { await load(); scheduleRefresh(); }, delay);
+    setTimeout(async () => {
+      const expanded = getExpandedSections();
+      await load();
+      restoreExpandedSections(expanded);
+      scheduleRefresh();
+    }, delay);
   }
   scheduleRefresh();
 
