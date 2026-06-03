@@ -6,7 +6,7 @@
   <title>Blue Jays Score</title>
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#003087">
+  <meta name="theme-color" content="#1D2D5C">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Jays Score">
@@ -14,9 +14,15 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* Team theme — recolored per team by applyTeam() (Settings → Team). */
+    :root {
+      --primary: #1D2D5C;   /* dark brand color / app background (white text reads on it) */
+      --accent:  #134A8E;   /* vivid brand color on white cards */
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-      background: #003087;
+      background: var(--primary);
       min-height: 100vh;
       padding: 16px 16px 40px;
       -webkit-font-smoothing: antialiased;
@@ -50,7 +56,7 @@
     .team-abbr { font-size: 12px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 2px; }
     .score-num { font-size: 50px; font-weight: 800; color: #1c1c1e; line-height: 1; }
     .score-num.dim { color: #ccc; }
-    .score-num.hi  { color: #003087; }
+    .score-num.hi  { color: var(--accent); }
     .score-dash { font-size: 30px; color: #ddd; font-weight: 300; padding: 0 6px; flex-shrink: 0; }
     .score-vs   { font-size: 16px; color: #ccc; padding: 0 12px; flex-shrink: 0; }
     .team-record { font-size: 11px; color: #c0c0c0; margin-top: 2px; }
@@ -100,7 +106,7 @@
     .ls-table th { color: #bbb; font-weight: 600; text-align: center; padding: 3px 6px; font-size: 11px; }
     .ls-table td { text-align: center; padding: 5px 6px; color: #666; }
     .ls-table td.ls-team { font-weight: 700; color: #1c1c1e; text-align: left; padding-right: 10px; min-width: 36px; }
-    .ls-table td.ls-rhe { font-weight: 700; color: #003087; border-left: 1px solid #f0f0f0; }
+    .ls-table td.ls-rhe { font-weight: 700; color: var(--accent); border-left: 1px solid #f0f0f0; }
     .ls-table .cur { background: #eef2ff; border-radius: 4px; }
 
     /* ── Venue / broadcasts ── */
@@ -110,7 +116,7 @@
 
     /* ── Season: record + streak ── */
     .record-row { display: flex; align-items: center; gap: 10px; }
-    .record-big { font-size: 30px; font-weight: 800; color: #003087; }
+    .record-big { font-size: 30px; font-weight: 800; color: var(--accent); }
     .streak-pill { padding: 3px 11px; border-radius: 10px; font-size: 13px; font-weight: 700; }
     .s-w { background: #e6f9ed; color: #1b7a34; }
     .s-l { background: #ffeeed; color: #c0392b; }
@@ -128,8 +134,8 @@
     .st-table th:first-child { text-align: left; }
     .st-table td { padding: 7px 0; color: #666; text-align: right; border-top: 1px solid #f5f5f5; }
     .st-table td:first-child { text-align: left; font-weight: 600; color: #1c1c1e; }
-    .st-table .jays td { color: #003087; font-weight: 700; }
-    .st-table .jays td:first-child { color: #003087; }
+    .st-table .jays td { color: var(--accent); font-weight: 700; }
+    .st-table .jays td:first-child { color: var(--accent); }
 
     /* ── Footer ── */
     .footer { text-align: center; padding: 4px 0 8px; }
@@ -139,26 +145,86 @@
     .copyright { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 11px; color: rgba(255,255,255,.3); margin-top: 8px; }
     .copyright a { color: rgba(255,255,255,.7); text-decoration: underline; text-underline-offset: 2px; }
     .copyright a:hover { color: #fff; }
-    .help-btn { background: none; color: rgba(255,255,255,.4); border: 1px solid rgba(255,255,255,.2); width: 18px; height: 18px; border-radius: 50%; font-size: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; line-height: 1; }
-    .help-btn:active { color: #fff; border-color: rgba(255,255,255,.5); }
+    .settings-btn { background: none; color: rgba(255,255,255,.4); border: none; padding: 2px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; line-height: 0; }
+    .settings-btn:active { color: #fff; }
 
-    /* ── README overlay ── */
-    #readme-bd { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:300; opacity:0; pointer-events:none; transition:opacity .25s; }
-    #readme-bd.open { opacity:1; pointer-events:auto; }
-    #readme-sh { position:fixed; left:0; right:0; bottom:0; z-index:301; background:#fff; border-radius:20px 20px 0 0; max-height:90vh; display:flex; flex-direction:column; transform:translateY(102%); transition:transform .3s cubic-bezier(.25,.46,.45,.94); box-shadow:0 -8px 32px rgba(0,0,0,.2); }
-    #readme-sh.open { transform:translateY(0); }
-    .readme-head { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid #f0f0f0; flex-shrink:0; }
-    .readme-title { font-size:15px; font-weight:700; color:#1c1c1e; }
-    .readme-close { background:none; border:none; font-size:24px; color:#bbb; cursor:pointer; line-height:1; padding:0 0 2px 16px; }
-    .readme-body { overflow-y:auto; flex:1; padding:16px; -webkit-overflow-scrolling:touch; line-height:1.6; font-size:13px; color:#444; }
-    .readme-body h1 { font-size:18px; font-weight:800; color:#003087; margin:0 0 12px; }
-    .readme-body h2 { font-size:14px; font-weight:700; color:#1c1c1e; margin:16px 0 6px; border-bottom:1px solid #f0f0f0; padding-bottom:4px; }
-    .readme-body p { margin:0 0 8px; }
-    .readme-body ul { padding-left:18px; margin:0 0 8px; }
-    .readme-body li { margin-bottom:3px; }
-    .readme-body a { color:#003087; }
-    .readme-body strong { color:#1c1c1e; }
-    .readme-body code { background:#f5f5f7; border-radius:4px; padding:1px 5px; font-size:12px; }
+    /* ── Settings overlay (About + Team + in-app Help) ── */
+    #set-bd { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:300; opacity:0; pointer-events:none; transition:opacity .25s; }
+    #set-bd.open { opacity:1; pointer-events:auto; }
+    #set-sh { position:fixed; left:0; right:0; bottom:0; z-index:301; background:#f2f2f7; border-radius:20px 20px 0 0; max-height:90vh; display:flex; flex-direction:column; transform:translateY(102%); transition:transform .3s cubic-bezier(.25,.46,.45,.94); box-shadow:0 -8px 32px rgba(0,0,0,.2); }
+    #set-sh.open { transform:translateY(0); }
+    .set-head { display:flex; align-items:center; gap:8px; padding:10px 16px; border-bottom:1px solid #e4e4ea; flex-shrink:0; }
+    .set-back { background:none; border:none; font-size:14px; font-weight:600; color:var(--accent); cursor:pointer; padding:0; line-height:1; }
+    .set-title { font-size:15px; font-weight:700; color:#1c1c1e; flex:1; }
+    .set-close { background:none; border:none; font-size:24px; color:#bbb; cursor:pointer; line-height:1; padding:0 0 2px 8px; }
+    .set-body { overflow-y:auto; flex:1; padding:14px; -webkit-overflow-scrolling:touch; }
+
+    /* Cards */
+    .set-card { background:#fff; border-radius:14px; padding:16px; margin-bottom:14px; }
+    .set-card:last-child { margin-bottom:0; }
+    .set-card-title { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; color:#8a8a8e; margin:0 0 12px; }
+    .set-app-name { font-size:16px; font-weight:700; color:#1c1c1e; margin-bottom:6px; }
+    .set-desc { font-size:13px; line-height:1.5; color:#666; margin-bottom:14px; }
+    .set-links { display:flex; flex-direction:column; gap:10px; }
+    .set-link { display:inline-flex; align-items:center; gap:7px; color:#1c1c1e; text-decoration:none; font-weight:600; font-size:13.5px; width:fit-content; }
+    .set-link.accent { color:var(--accent); }
+    .set-copy { margin-top:14px; padding-top:12px; border-top:1px solid #f0f0f0; font-size:12px; color:#aaa; }
+
+    /* Team picker */
+    .team-row { display:flex; align-items:center; gap:12px; }
+    .team-logo { width:40px; height:40px; object-fit:contain; flex-shrink:0; }
+    .team-select { flex:1; width:100%; padding:11px 36px 11px 12px; font-size:14px; font-weight:600; color:#1c1c1e; background-color:#fff; border:1px solid #d8d8de; border-radius:10px; cursor:pointer; -webkit-appearance:none; appearance:none; background-repeat:no-repeat; background-position:right 12px center; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>"); }
+    .team-select:focus { outline:none; border-color:var(--accent); }
+
+    /* Help index */
+    .help-card-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+    .help-viewall { font-size:12px; font-weight:700; color:var(--accent); text-decoration:none; }
+    .help-cat-link { display:flex; align-items:center; gap:4px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:var(--primary); text-decoration:none; margin:16px 0 4px; }
+    .help-cat-link:first-of-type { margin-top:10px; }
+    .help-item { display:block; padding:10px 0; border-top:1px solid #f3f3f5; text-decoration:none; cursor:pointer; }
+    .help-item-title { font-size:14px; font-weight:600; color:#1c1c1e; }
+    .help-item-title::after { content:'›'; float:right; color:#ccc; font-weight:700; }
+    .help-item-sum { font-size:12px; color:#888; margin-top:2px; line-height:1.4; }
+    .help-empty { font-size:13px; color:#999; line-height:1.5; }
+
+    /* Breadcrumbs */
+    .bc { display:flex; flex-wrap:wrap; align-items:center; gap:5px; font-size:12px; color:#999; margin:0 2px 12px; }
+    .bc a { color:#666; font-weight:600; text-decoration:none; }
+    .bc-cur { color:#1c1c1e; font-weight:600; }
+    .bc-sep { color:#ccc; }
+
+    /* Table of contents box */
+    .toc-box { background:#f7f7f9; border:1px solid #ececf0; border-radius:12px; padding:12px 14px; margin-bottom:16px; }
+    .toc-title { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:#9a9aa0; margin-bottom:6px; }
+    .toc-box ul { list-style:none; margin:0; padding:0; }
+    .toc-box li { margin:2px 0; }
+    .toc-box a { display:block; font-size:13px; color:#555; text-decoration:none; padding:2px 0; }
+    .toc-box a.toc-sec { font-size:13px; font-weight:800; color:#1c1c1e; margin-top:6px; }
+    .toc-box a.toc-guide { font-weight:600; color:#333; }
+    .toc-steps { border-left:1px solid #e4e4ea; margin:2px 0 6px 4px !important; padding-left:8px !important; }
+    .toc-steps a { font-size:12px; color:#888; }
+    .toc-sub { padding-left:10px !important; }
+
+    /* Section / full-docs headers */
+    .docs-sec { margin-top:20px; }
+    .docs-sec-title { font-size:18px; font-weight:800; color:var(--accent); border-bottom:1px solid #eee; padding-bottom:6px; margin:0 0 14px; }
+    .guide-sec { margin-top:18px; }
+    .guide-sec + .guide-sec, .docs-sec .guide-sec { border-top:1px solid #f2f2f2; padding-top:16px; }
+    .guide-sec-title { font-size:15px; font-weight:800; color:#1c1c1e; margin:0 0 2px; scroll-margin-top:8px; }
+    .guide-sec-sum { font-size:12px; color:#888; margin:0 0 8px; line-height:1.4; }
+    section[id], article[id] { scroll-margin-top:8px; }
+
+    /* Guide body (process / section / full-docs articles) */
+    .guide-body { font-size:13px; line-height:1.6; color:#444; }
+    .guide-body h1 { font-size:18px; font-weight:800; color:var(--accent); margin:0 0 12px; }
+    .guide-body h2 { font-size:14px; font-weight:700; color:#1c1c1e; margin:16px 0 6px; border-bottom:1px solid #f0f0f0; padding-bottom:4px; scroll-margin-top:8px; }
+    .guide-body h3 { font-size:13px; font-weight:700; color:#1c1c1e; margin:12px 0 4px; scroll-margin-top:8px; }
+    .guide-body p { margin:0 0 8px; }
+    .guide-body ul, .guide-body ol { padding-left:20px; margin:0 0 8px; }
+    .guide-body li { margin-bottom:4px; }
+    .guide-body a { color:var(--accent); }
+    .guide-body strong { color:#1c1c1e; }
+    .guide-body code { background:#f5f5f7; border-radius:4px; padding:1px 5px; font-size:12px; }
 
     /* ── States ── */
     .loading { color: #aaa; font-size: 14px; text-align: center; padding: 28px; }
@@ -174,7 +240,7 @@
     /* ── Team toggle ── */
     .team-toggle { display:flex; gap:6px; margin-bottom:10px; }
     .team-btn { flex:1; padding:7px 0; border-radius:10px; border:none; font-size:12px; font-weight:600; cursor:pointer; background:#f0f0f5; color:#666; -webkit-tap-highlight-color:transparent; }
-    .team-btn.active { background:#003087; color:#fff; }
+    .team-btn.active { background:var(--accent); color:#fff; }
 
     /* ── Player stats table ── */
     .ps-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
@@ -193,9 +259,9 @@
     .pbp-desc { font-size:12px; color:#444; line-height:1.4; margin-top:2px; }
     .pbp-scoring .pbp-desc { color:#1b7a34; font-weight:600; }
     .pbp-hr .pbp-desc { color:#c0392b; font-weight:700; }
-    .pbp-jays .pbp-inn { color:#003087; }
+    .pbp-jays .pbp-inn { color:var(--accent); }
     .pbp-opp  .pbp-inn { color:#e04820; }
-    .see-all-btn { display:block; text-align:center; color:#003087; font-size:12px; font-weight:600; padding:8px 0 2px; cursor:pointer; background:none; border:none; width:100%; -webkit-tap-highlight-color:transparent; }
+    .see-all-btn { display:block; text-align:center; color:var(--accent); font-size:12px; font-weight:600; padding:8px 0 2px; cursor:pointer; background:none; border:none; width:100%; -webkit-tap-highlight-color:transparent; }
 
     /* ── Other games card ── */
     .og-row { display:flex; align-items:center; padding:6px 0; border-top:1px solid #f2f2f2; gap:6px; width:100%; }
@@ -224,7 +290,7 @@
     .filter-row { display:flex; gap:6px; overflow-x:auto; padding:0 0 10px; scrollbar-width:none; }
     .filter-row::-webkit-scrollbar { display:none; }
     .fpill { padding:5px 13px; border-radius:14px; font-size:12px; font-weight:600; cursor:pointer; border:none; background:#f0f0f5; color:#666; white-space:nowrap; flex-shrink:0; -webkit-tap-highlight-color:transparent; }
-    .fpill.active { background:#003087; color:#fff; }
+    .fpill.active { background:var(--accent); color:#fff; }
 
     /* ── Overlay / bottom sheet ── */
     #ov-bd { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:200; opacity:0; pointer-events:none; transition:opacity .25s; }
@@ -237,7 +303,7 @@
     .ov-close { background:none; border:none; font-size:24px; color:#bbb; cursor:pointer; line-height:1; padding:0 0 2px 16px; }
     .ov-tabs { display:flex; border-bottom:1px solid #f0f0f0; flex-shrink:0; }
     .ov-tab { flex:1; padding:10px; font-size:13px; font-weight:600; background:none; border:none; cursor:pointer; color:#aaa; border-bottom:2px solid transparent; -webkit-tap-highlight-color:transparent; }
-    .ov-tab.active { color:#003087; border-bottom-color:#003087; }
+    .ov-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
     .ov-body { overflow-y:auto; flex:1; -webkit-overflow-scrolling:touch; }
     .ov-sec { padding:14px 16px; }
     .ov-filter-wrap { position:sticky; top:0; background:#fff; padding:8px 16px 0; border-bottom:1px solid #f0f0f0; z-index:1; }
@@ -264,19 +330,25 @@
     <p class="updated" id="updated"></p>
     <p class="copyright">
       © 2026 <a href="https://github.com/timtomnow/bluejays-score" target="_blank" rel="noopener">timtomnow</a>
-      <button class="help-btn" onclick="openReadme()" aria-label="About this app">?</button>
+      <button class="settings-btn" onclick="openSettings()" aria-label="Settings">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
     </p>
   </div>
 </div>
 
-<div id="readme-bd" onclick="closeReadme()"></div>
-<div id="readme-sh">
+<div id="set-bd" onclick="closeSettings()"></div>
+<div id="set-sh">
   <div class="ov-handle"></div>
-  <div class="readme-head">
-    <div class="readme-title">About this app</div>
-    <button class="readme-close" onclick="closeReadme()">&#x2715;</button>
+  <div class="set-head">
+    <button class="set-back" id="set-back" onclick="renderSettingsHome()" hidden>&#x2039; Back</button>
+    <div class="set-title" id="set-title">Settings</div>
+    <button class="set-close" onclick="closeSettings()" aria-label="Close">&#x2715;</button>
   </div>
-  <div class="readme-body" id="readme-body"><div class="loading">Loading…</div></div>
+  <div class="set-body" id="set-body"></div>
 </div>
 
 <div id="ov-bd" onclick="closeOverlay()"></div>
@@ -294,11 +366,108 @@
 </div>
 
 <script>
-  const TEAM_ID     = 141;  // Toronto Blue Jays
-  const DIVISION_ID = 201;  // AL East
-  const LEAGUE_ID   = 103;  // American League
+  // Every MLB team, keyed by its abbreviation. `id` is the MLB team id (used for
+  // schedule/standings matching and the logo URL), `div` the division id the
+  // standings code filters on (200 AL West / 201 AL East / 202 AL Central /
+  // 203 NL West / 204 NL East / 205 NL Central). `primary` (dark, for the app
+  // background/header) and `accent` (vivid on white cards) drive the theme via
+  // the --primary / --accent CSS vars. The user picks which team the app follows
+  // (Settings → Team); the choice is saved per-device.
+  const TEAMS = {
+    // ── American League ──
+    BAL: { name: 'Baltimore Orioles',     id: 110, div: 201, primary: '#1A1A1A', accent: '#DF4601' },
+    BOS: { name: 'Boston Red Sox',        id: 111, div: 201, primary: '#0C2340', accent: '#BD3039' },
+    NYY: { name: 'New York Yankees',      id: 147, div: 201, primary: '#0C2340', accent: '#1559A8' },
+    TBR: { name: 'Tampa Bay Rays',        id: 139, div: 201, primary: '#092C5C', accent: '#F5D130' },
+    TOR: { name: 'Toronto Blue Jays',     id: 141, div: 201, primary: '#1D2D5C', accent: '#134A8E' },
+    CWS: { name: 'Chicago White Sox',     id: 145, div: 202, primary: '#27251F', accent: '#000000' },
+    CLE: { name: 'Cleveland Guardians',   id: 114, div: 202, primary: '#0C2340', accent: '#E31937' },
+    DET: { name: 'Detroit Tigers',        id: 116, div: 202, primary: '#0C2340', accent: '#FA4616' },
+    KC:  { name: 'Kansas City Royals',    id: 118, div: 202, primary: '#004687', accent: '#BD9B60' },
+    MIN: { name: 'Minnesota Twins',       id: 142, div: 202, primary: '#002B5C', accent: '#D31145' },
+    HOU: { name: 'Houston Astros',        id: 117, div: 200, primary: '#002D62', accent: '#EB6E1F' },
+    LAA: { name: 'Los Angeles Angels',    id: 108, div: 200, primary: '#003263', accent: '#BA0021' },
+    ATH: { name: 'Athletics',             id: 133, div: 200, primary: '#003831', accent: '#EFB21E' },
+    SEA: { name: 'Seattle Mariners',      id: 136, div: 200, primary: '#0C2C56', accent: '#005C5C' },
+    TEX: { name: 'Texas Rangers',         id: 140, div: 200, primary: '#003278', accent: '#C0111F' },
+    // ── National League ──
+    ATL: { name: 'Atlanta Braves',        id: 144, div: 204, primary: '#13274F', accent: '#CE1141' },
+    MIA: { name: 'Miami Marlins',         id: 146, div: 204, primary: '#000000', accent: '#00A3E0' },
+    NYM: { name: 'New York Mets',         id: 121, div: 204, primary: '#002D72', accent: '#FF5910' },
+    PHI: { name: 'Philadelphia Phillies', id: 143, div: 204, primary: '#284898', accent: '#E81828' },
+    WSH: { name: 'Washington Nationals',  id: 120, div: 204, primary: '#14225A', accent: '#AB0003' },
+    CHC: { name: 'Chicago Cubs',          id: 112, div: 205, primary: '#0E3386', accent: '#CC3433' },
+    CIN: { name: 'Cincinnati Reds',       id: 113, div: 205, primary: '#000000', accent: '#C6011F' },
+    MIL: { name: 'Milwaukee Brewers',     id: 158, div: 205, primary: '#12284B', accent: '#FFC52F' },
+    PIT: { name: 'Pittsburgh Pirates',    id: 134, div: 205, primary: '#27251F', accent: '#FDB827' },
+    STL: { name: 'St. Louis Cardinals',   id: 138, div: 205, primary: '#0C2340', accent: '#C41E3A' },
+    ARI: { name: 'Arizona Diamondbacks',  id: 109, div: 203, primary: '#000000', accent: '#A71930' },
+    COL: { name: 'Colorado Rockies',      id: 115, div: 203, primary: '#33006F', accent: '#5F259F' },
+    LAD: { name: 'Los Angeles Dodgers',   id: 119, div: 203, primary: '#005A9C', accent: '#EF3E42' },
+    SD:  { name: 'San Diego Padres',      id: 135, div: 203, primary: '#2F241D', accent: '#FFC425' },
+    SF:  { name: 'San Francisco Giants',  id: 137, div: 203, primary: '#27251F', accent: '#FD5A1E' },
+  };
+
+  // Division id → display name (standings header + rank tag).
+  const DIV_NAMES = {
+    200: 'AL West', 201: 'AL East', 202: 'AL Central',
+    203: 'NL West', 204: 'NL East', 205: 'NL Central',
+  };
+
+  // Team logos: MLB's by-id SVG, with an ESPN PNG fallback keyed by abbreviation.
+  const teamLogo = id => `https://www.mlbstatic.com/team-logos/${id}.svg`;
+  const teamLogoFallback = abbr => `https://a.espncdn.com/i/teamlogos/mlb/500/${abbr.toLowerCase()}.png`;
+
+  // Active team. These stay mutable so Settings → Team can repoint the whole app;
+  // the rest of the code reads TEAM_ID / DIVISION_ID / LEAGUE_ID as before.
+  const DEFAULT_ABBREV = 'TOR';
+  const TEAM_KEY = 'bluejays-score:team';
+  function storedTeam() {
+    const v = localStorage.getItem(TEAM_KEY);
+    return TEAMS[v] ? v : DEFAULT_ABBREV;
+  }
+  let TEAM_ABBREV = storedTeam();
+  let TEAM        = TEAMS[TEAM_ABBREV];
+  let TEAM_ID     = TEAM.id;
+  let DIVISION_ID = TEAM.div;
+  let LEAGUE_ID   = TEAM.div >= 203 ? 104 : 103;   // AL = 103, NL = 104
+  let ACCENT      = TEAM.accent;                    // used by canvas/inline-styled renderers
+
+  // Repaint the app for `abbr`: theme colors, header logo/title, division/league,
+  // and (via load()) every team-specific section. Persists unless told otherwise.
+  function applyTeam(abbr, persist = true) {
+    const t = TEAMS[abbr];
+    if (!t) return;
+    TEAM_ABBREV = abbr;
+    TEAM = t;
+    TEAM_ID = t.id;
+    DIVISION_ID = t.div;
+    LEAGUE_ID = t.div >= 203 ? 104 : 103;
+    ACCENT = t.accent;
+    if (persist) localStorage.setItem(TEAM_KEY, abbr);
+    const root = document.documentElement.style;
+    root.setProperty('--primary', t.primary);
+    root.setProperty('--accent', t.accent);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', t.primary);
+    const logo = document.querySelector('.logo-img');
+    if (logo) {
+      logo.onerror = function () { this.onerror = null; this.src = teamLogoFallback(abbr); };
+      logo.src = teamLogo(t.id);
+      logo.alt = t.name;
+    }
+    const h1 = document.querySelector('.header h1');
+    if (h1) h1.textContent = t.name;
+  }
+
+  function onTeamChange(val) {
+    applyTeam(val);
+    load();   // re-render every section for the newly selected team
+  }
 
   // ── Helpers ──────────────────────────────────────────────────────────────
+
+  const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
   const pad2 = n => String(n).padStart(2, '0');
 
@@ -411,8 +580,8 @@
     }).join('');
 
     const polys = bases.map(({x,y,on,home}) => {
-      const fill   = home ? 'none'    : on ? '#003087' : '#ebebeb';
-      const stroke = home ? '#ccc'    : on ? '#003087' : '#ccc';
+      const fill   = home ? 'none'    : on ? ACCENT : '#ebebeb';
+      const stroke = home ? '#ccc'    : on ? ACCENT : '#ccc';
       const pts = `${x},${y-bs} ${x+bs},${y} ${x},${y+bs} ${x-bs},${y}`;
       return `<polygon points="${pts}" fill="${fill}" stroke="${stroke}" stroke-width="${home ? 1.5 : 1}"/>`;
     }).join('');
@@ -826,7 +995,7 @@
 
         if (batter || pitcher) {
           const isTop = fls?.isTopInning ?? true;
-          const jaysColor = '#003087';
+          const jaysColor = ACCENT;
           const oppColor  = '#c0392b';
           const awayColor = jaysAway ? jaysColor : oppColor;
           const homeColor = jaysAway ? oppColor  : jaysColor;
@@ -989,7 +1158,7 @@
         <div class="record-row">
           <span class="record-big">${jaysRec.wins}–${jaysRec.losses}</span>
           ${streak ? `<span class="streak-pill ${sCls}">${streak}</span>` : ''}
-          <span class="rank-tag">${rank}${rankSuffix(rank)} AL East · ${jaysRec.winningPercentage ?? ''}</span>
+          <span class="rank-tag">${rank}${rankSuffix(rank)} ${DIV_NAMES[DIVISION_ID]} · ${jaysRec.winningPercentage ?? ''}</span>
         </div>
       </div>`;
     }
@@ -1008,7 +1177,7 @@
         </tr>`;
       }).join('');
       html += `<div class="sec">
-        <div class="sec-title">AL East</div>
+        <div class="sec-title">${DIV_NAMES[DIVISION_ID]}</div>
         <table class="st-table">
           <thead><tr><th>Team</th><th>W</th><th>L</th><th>GB</th><th>Str</th></tr></thead>
           <tbody>${rows}</tbody>
@@ -1050,7 +1219,7 @@
       const d = new Date(gm.date + 'T12:00:00');
       const dateStr = d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
       gameInfoCache[gm.gamePk] = {
-        title: `${gm.jaysAway ? 'TOR @ ' + oppAb : oppAb + ' @ TOR'} · ${dateStr}`,
+        title: `${gm.jaysAway ? TEAM_ABBREV + ' @ ' + oppAb : oppAb + ' @ ' + TEAM_ABBREV} · ${dateStr}`,
       };
     }
 
@@ -1110,7 +1279,7 @@
           <div style="font-size:13px;font-weight:700;color:#1c1c1e">${ha}${oppName}</div>
           <div style="font-size:11px;color:#aaa;margin-top:2px">${dateStr}${timeStr ? ' · ' + timeStr : ''}</div>
           ${(jaysPP || oppPP) ? `<div style="font-size:11px;color:#bbb;margin-top:3px">
-            ${jaysPP ? `TOR: ${jaysPP}` : ''}${jaysPP && oppPP ? '&nbsp;·&nbsp;' : ''}${oppPP ? `${abbr(opp)}: ${oppPP}` : ''}
+            ${jaysPP ? `${TEAM_ABBREV}: ${jaysPP}` : ''}${jaysPP && oppPP ? '&nbsp;·&nbsp;' : ''}${oppPP ? `${abbr(opp)}: ${oppPP}` : ''}
           </div>` : ''}
         </div>`;
       }).join('');
@@ -1238,7 +1407,7 @@
         gameEl.innerHTML = `<div class="card">
           <div class="sec">
             <span class="badge b-off">Off Day</span>
-            <div class="off-msg">No game today. Rest up, Blue Jays.</div>
+            <div class="off-msg">No game today. Rest up, ${TEAM.name}.</div>
           </div>
         </div>`;
       } else {
@@ -1257,68 +1426,304 @@
     }
   }
 
-  // ── README overlay ────────────────────────────────────────────────────────
+  // ── Settings overlay (About + Team + in-app Help) ───────────────────────────
+  // The Help section is the ttn-docs vanilla-js adapter: it reads guides from
+  // docs/help/ — an index.json listing guide slugs, plus one Markdown file per
+  // slug with `title / category / order / summary` frontmatter. Drop new guides
+  // there (e.g. via the ttn-docs skill) and they appear automatically — no code
+  // change needed. See reference/adapters/vanilla-js.md in the ttn-docs skill.
 
-  function githubRawUrl() {
-    const { hostname, pathname } = window.location;
-    if (hostname.endsWith('.github.io')) {
-      const user = hostname.replace('.github.io', '');
-      const repo = pathname.split('/').filter(Boolean)[0] ?? '';
-      if (repo) return `https://raw.githubusercontent.com/${user}/${repo}/main/README.md`;
-    }
-    return null;
+  // Lowercase, dash-separated slug — used for both category ids and heading anchors.
+  function helpSlugify(t) {
+    return String(t).toLowerCase().trim()
+      .replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
   }
 
-  function parseMarkdown(md) {
-    return md
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+  // Pull ## / ### headings out of a body to build "on this page" / section ToCs.
+  function extractHeadings(body) {
+    const out = [];
+    let fence = false;
+    for (const line of body.split('\n')) {
+      if (/^\s*```/.test(line)) { fence = !fence; continue; }
+      if (fence) continue;
+      const m = /^(#{2,3})\s+(.+?)\s*#*$/.exec(line);
+      if (!m) continue;
+      const text = m[2].trim();
+      out.push({ level: m[1].length, text, id: helpSlugify(text) });
+    }
+    return out;
+  }
+
+  // Lightweight Markdown renderer for guide bodies. Headings get ids (prefixed
+  // with `idPrefix` so several guides can share one page without colliding), and
+  // internal /help/<slug> links are tagged so clicks navigate within the sheet.
+  function renderGuideMarkdown(md, idPrefix = '') {
+    const inline = t => esc(t)
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
-      .replace(/^- (.+)$/gm, '<li>$1</li>')
-      .replace(/(<li>[\s\S]*?<\/li>)(\n(?!<li>))/g, '<ul>$1</ul>\n')
-      .replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`)
-      .replace(/\n\n+/g, '</p><p>')
-      .replace(/^(?!<[hup])/gm, '')
-      .replace(/<\/ul><ul>/g, '')
-      .replace(/(<p>|<\/p>)+/g, m => m.length > 4 ? '<p>' : m);
-  }
-
-  async function openReadme() {
-    document.getElementById('readme-bd').classList.add('open');
-    document.getElementById('readme-sh').classList.add('open');
-    document.body.style.overflow = 'hidden';
-    const bodyEl = document.getElementById('readme-body');
-    bodyEl.innerHTML = '<div class="loading">Loading…</div>';
-    try {
-      let md = null;
-      // Try relative path first (works on any proper web server)
-      try {
-        const r = await fetch('./README.md');
-        if (r.ok) md = await r.text();
-      } catch(_) {}
-      // Fall back to raw GitHub URL (handles file:// and other edge cases)
-      if (!md) {
-        const fallback = githubRawUrl();
-        if (!fallback) throw new Error('README could not be loaded');
-        const r = await fetch(fallback);
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        md = await r.text();
-      }
-      bodyEl.innerHTML = parseMarkdown(md);
-    } catch(e) {
-      bodyEl.innerHTML = `<div class="err">Could not load README.<br>${e.message}</div>`;
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, txt, href) => {
+        const help = href.match(/^\/help\/(.+)$/);
+        if (help) return `<a href="#" data-help="${esc(help[1])}">${txt}</a>`;
+        return `<a href="${esc(href)}" target="_blank" rel="noopener">${txt}</a>`;
+      });
+    const lines = md.split('\n');
+    let html = '', list = null;
+    const closeList = () => { if (list) { html += `</${list}>`; list = null; } };
+    for (const raw of lines) {
+      const line = raw.trimEnd();
+      let m, t;
+      if (/^###\s+/.test(line))                  { t = line.slice(4); closeList(); html += `<h3 id="${idPrefix}${helpSlugify(t)}">${inline(t)}</h3>`; }
+      else if (/^##\s+/.test(line))              { t = line.slice(3); closeList(); html += `<h2 id="${idPrefix}${helpSlugify(t)}">${inline(t)}</h2>`; }
+      else if (/^#\s+/.test(line))               { closeList(); html += `<h1>${inline(line.slice(2))}</h1>`; }
+      else if ((m = line.match(/^\d+\.\s+(.*)/))) { if (list !== 'ol') { closeList(); html += '<ol>'; list = 'ol'; } html += `<li>${inline(m[1])}</li>`; }
+      else if ((m = line.match(/^[-*]\s+(.*)/)))  { if (list !== 'ul') { closeList(); html += '<ul>'; list = 'ul'; } html += `<li>${inline(m[1])}</li>`; }
+      else if (line.trim() === '')                { closeList(); }
+      else                                        { closeList(); html += `<p>${inline(line)}</p>`; }
     }
+    closeList();
+    return html;
   }
 
-  function closeReadme() {
-    document.getElementById('readme-bd').classList.remove('open');
-    document.getElementById('readme-sh').classList.remove('open');
+  function parseGuide(slug, text) {
+    const m = text.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+    const fm = {};
+    let body = text;
+    if (m) {
+      body = m[2];
+      for (const l of m[1].split('\n')) {
+        const i = l.indexOf(':');
+        if (i > 0) fm[l.slice(0, i).trim()] = l.slice(i + 1).trim().replace(/^["']|["']$/g, '');
+      }
+    }
+    return {
+      slug,
+      title: fm.title || slug,
+      category: fm.category || 'Help',
+      order: parseInt(fm.order, 10) || 999,
+      summary: fm.summary || '',
+      body,
+      headings: extractHeadings(body),
+    };
+  }
+
+  // Group the (already-sorted) guides into sections, preserving order.
+  function getGuidesByCategory(guides) {
+    const groups = new Map();
+    for (const g of guides) {
+      if (!groups.has(g.category)) groups.set(g.category, []);
+      groups.get(g.category).push(g);
+    }
+    return [...groups.entries()].map(([category, gs]) => ({ category, slug: helpSlugify(category), guides: gs }));
+  }
+
+  let _guides = null;   // cached after first load: array of parsed guides, or [] if none
+  async function loadGuides() {
+    if (_guides) return _guides;
+    try {
+      const r = await fetch('./docs/help/index.json');
+      if (!r.ok) throw new Error('no index');
+      const slugs = await r.json();
+      const guides = await Promise.all(slugs.map(async slug => {
+        try {
+          const gr = await fetch(`./docs/help/${slug}.md`);
+          if (!gr.ok) return null;
+          return parseGuide(slug, await gr.text());
+        } catch { return null; }
+      }));
+      // Known categories lead in this order; anything else falls back to alphabetical.
+      const CAT_RANK = ['Getting started', 'Following the Blue Jays', 'Game details', 'Around the league'];
+      const rank = c => { const i = CAT_RANK.indexOf(c); return i === -1 ? CAT_RANK.length : i; };
+      _guides = guides.filter(Boolean).sort((a, b) =>
+        rank(a.category) - rank(b.category) ||
+        a.category.localeCompare(b.category) ||
+        a.order - b.order);
+    } catch {
+      _guides = [];
+    }
+    return _guides;
+  }
+
+  function aboutCardHtml() {
+    const octocat = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" style="flex-shrink:0"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>';
+    return `
+      <div class="set-card">
+        <div class="set-card-title">About</div>
+        <div class="set-app-name">Blue Jays Score</div>
+        <div class="set-desc">A lightweight tracker for the Toronto Blue Jays and the rest of Major League Baseball — live scores, the at-bat situation, division standings, inline box scores &amp; play-by-play, and recent &amp; upcoming games. Installable as a home-screen app.</div>
+        <div class="set-links">
+          <a class="set-link" href="https://github.com/timtomnow/bluejays-score" target="_blank" rel="noopener">${octocat}<span>github.com/timtomnow/bluejays-score</span></a>
+          <a class="set-link accent" href="https://timtomnow.github.io/app-portfolio/" target="_blank" rel="noopener">Check out my other apps on the portfolio site →</a>
+        </div>
+        <div class="set-copy">© ${new Date().getFullYear()} timtomnow · not affiliated with MLB or the Toronto Blue Jays</div>
+      </div>`;
+  }
+
+  // ── Help: shared view fragments ─────────────────────────────────────────────
+  function breadcrumbsHtml(items) {
+    return `<nav class="bc">` + items.map((it, i) => {
+      const sep = i > 0 ? '<span class="bc-sep">›</span>' : '';
+      return it.current
+        ? `${sep}<span class="bc-cur">${esc(it.label)}</span>`
+        : `${sep}<a href="#" ${it.attr}>${esc(it.label)}</a>`;
+    }).join('') + `</nav>`;
+  }
+
+  // The step-level (heading) list for one guide, anchoring into `idPrefix`.
+  function guideStepsHtml(guide, idPrefix) {
+    if (!guide.headings.length) return '';
+    return `<ul class="toc-steps">` + guide.headings.map(h =>
+      `<li style="padding-left:${(h.level - 2) * 12}px"><a href="#${idPrefix}${h.id}">${esc(h.text)}</a></li>`
+    ).join('') + `</ul>`;
+  }
+
+  const tocBoxHtml = (title, inner) => `<div class="toc-box"><div class="toc-title">${esc(title)}</div>${inner}</div>`;
+
+  // Markup for one guide rendered inline on a multi-guide page (section / docs).
+  function guideArticleHtml(g, tag) {
+    return `<${tag} id="${g.slug}" class="guide-sec">
+      <div class="guide-sec-title">${esc(g.title)}</div>
+      ${g.summary ? `<div class="guide-sec-sum">${esc(g.summary)}</div>` : ''}
+      <div class="guide-body">${renderGuideMarkdown(g.body, g.slug + '--')}</div>
+    </${tag}>`;
+  }
+
+  // ── Settings home cards ─────────────────────────────────────────────────────
+  function teamCardHtml() {
+    const opts = Object.entries(TEAMS)
+      .sort((a, b) => a[1].name.localeCompare(b[1].name))
+      .map(([abbr, t]) => `<option value="${abbr}"${abbr === TEAM_ABBREV ? ' selected' : ''}>${esc(t.name)}</option>`)
+      .join('');
+    return `<div class="set-card">
+      <div class="set-card-title">Team</div>
+      <div class="set-desc" style="margin-bottom:12px">Choose which MLB team this app follows. Your pick is saved on this device.</div>
+      <div class="team-row">
+        <img class="team-logo" src="${teamLogo(TEAM_ID)}" alt="" onerror="this.onerror=null;this.src='${teamLogoFallback(TEAM_ABBREV)}'">
+        <select class="team-select" aria-label="Select team" onchange="onTeamChange(this.value)">${opts}</select>
+      </div>
+    </div>`;
+  }
+
+  function helpCardHtml(guides) {
+    if (!guides.length) {
+      return `<div class="set-card"><div class="set-card-title">Help guide</div>
+        <div class="help-empty">No help guides have been published yet. Check back soon.</div></div>`;
+    }
+    const body = getGuidesByCategory(guides).map(s => `
+      <a class="help-cat-link" href="#" data-section="${s.slug}">${esc(s.category)} <span>›</span></a>
+      ${s.guides.map(g => `<a class="help-item" href="#" data-help="${esc(g.slug)}">
+        <div class="help-item-title">${esc(g.title)}</div>
+        ${g.summary ? `<div class="help-item-sum">${esc(g.summary)}</div>` : ''}
+      </a>`).join('')}`).join('');
+    return `<div class="set-card">
+      <div class="help-card-head">
+        <div class="set-card-title" style="margin:0">Help guide</div>
+        <a class="help-viewall" href="#" data-all>View all docs →</a>
+      </div>${body}</div>`;
+  }
+
+  // ── Help: the four views ────────────────────────────────────────────────────
+  const setBody = () => document.getElementById('set-body');
+  function setHelpHead(title, showBack) {
+    document.getElementById('set-title').textContent = title;
+    document.getElementById('set-back').hidden = !showBack;
+  }
+
+  // 1. Index — About card + Team card + the help index.
+  async function renderSettingsHome() {
+    setHelpHead('Settings', false);
+    setBody().innerHTML = aboutCardHtml() + teamCardHtml() + `<div class="set-card"><div class="set-card-title">Help guide</div><div class="loading">Loading…</div></div>`;
+    const guides = await loadGuides();
+    setBody().innerHTML = aboutCardHtml() + teamCardHtml() + helpCardHtml(guides);
+    setBody().scrollTop = 0;
+  }
+
+  // 2. Process — one guide, with an "On this page" ToC of its steps.
+  async function showGuide(slug) {
+    const guides = await loadGuides();
+    const g = guides.find(x => x.slug === slug);
+    if (!g) return renderSettingsHome();
+    setHelpHead(g.title, true);
+    const crumbs = breadcrumbsHtml([
+      { label: 'Help', attr: 'data-home' },
+      { label: g.category, attr: `data-section="${helpSlugify(g.category)}"` },
+      { label: g.title, current: true },
+    ]);
+    const toc = g.headings.length ? tocBoxHtml('On this page', guideStepsHtml(g, '')) : '';
+    setBody().innerHTML = `${crumbs}<div class="set-card">${toc}<div class="guide-body">${renderGuideMarkdown(g.body)}</div></div>`;
+    setBody().scrollTop = 0;
+  }
+
+  // 3. Section — every process in one category, on one page.
+  async function showSection(catSlug) {
+    const guides = await loadGuides();
+    const section = getGuidesByCategory(guides).find(s => s.slug === catSlug);
+    if (!section) return renderSettingsHome();
+    setHelpHead(section.category, true);
+    const crumbs = breadcrumbsHtml([
+      { label: 'Help', attr: 'data-home' },
+      { label: section.category, current: true },
+    ]);
+    const toc = tocBoxHtml('In this section', `<ul>` + section.guides.map(g =>
+      `<li><a class="toc-guide" href="#${g.slug}">${esc(g.title)}</a>${guideStepsHtml(g, g.slug + '--')}</li>`
+    ).join('') + `</ul>`);
+    const articles = section.guides.map(g => guideArticleHtml(g, 'section')).join('');
+    setBody().innerHTML = `${crumbs}<div class="set-card">${toc}${articles}</div>`;
+    setBody().scrollTop = 0;
+  }
+
+  // 4. Full docs — the entire manual on one page with a nested contents tree.
+  async function showAll() {
+    const guides = await loadGuides();
+    const sections = getGuidesByCategory(guides);
+    if (!sections.length) return renderSettingsHome();
+    setHelpHead('Full help docs', true);
+    const crumbs = breadcrumbsHtml([
+      { label: 'Help', attr: 'data-home' },
+      { label: 'Full docs', current: true },
+    ]);
+    const contents = tocBoxHtml('Contents', `<ul>` + sections.map(s =>
+      `<li><a class="toc-sec" href="#section-${s.slug}">${esc(s.category)}</a>
+        <ul class="toc-sub">` + s.guides.map(g =>
+          `<li><a class="toc-guide" href="#${g.slug}">${esc(g.title)}</a>${guideStepsHtml(g, g.slug + '--')}</li>`
+        ).join('') + `</ul></li>`
+    ).join('') + `</ul>`);
+    const body = sections.map(s => `
+      <section id="section-${s.slug}" class="docs-sec">
+        <div class="docs-sec-title">${esc(s.category)}</div>
+        ${s.guides.map(g => guideArticleHtml(g, 'article')).join('')}
+      </section>`).join('');
+    setBody().innerHTML = `${crumbs}<div class="set-card">${contents}${body}</div>`;
+    setBody().scrollTop = 0;
+  }
+
+  function openSettings() {
+    document.getElementById('set-bd').classList.add('open');
+    document.getElementById('set-sh').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderSettingsHome();
+  }
+
+  function closeSettings() {
+    document.getElementById('set-bd').classList.remove('open');
+    document.getElementById('set-sh').classList.remove('open');
     document.body.style.overflow = '';
   }
+
+  // Delegate clicks inside the sheet: navigate help views, or scroll to an
+  // in-page anchor (the scroll container is the sheet body, not the window).
+  setBody().addEventListener('click', (e) => {
+    const a = e.target.closest('a');
+    if (!a) return;
+    if (a.hasAttribute('data-home'))    { e.preventDefault(); return renderSettingsHome(); }
+    if (a.hasAttribute('data-all'))     { e.preventDefault(); return showAll(); }
+    if (a.hasAttribute('data-section')) { e.preventDefault(); return showSection(a.getAttribute('data-section')); }
+    if (a.hasAttribute('data-help'))    { e.preventDefault(); return showGuide(a.getAttribute('data-help')); }
+    const href = a.getAttribute('href') || '';
+    if (href.length > 1 && href.startsWith('#')) {
+      const el = document.getElementById(decodeURIComponent(href.slice(1)));
+      if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    }
+  });
 
   // Self-rescheduling refresh: 30 s live, 60 s scheduled, 5 min off-day
   function scheduleRefresh() {
@@ -1334,7 +1739,18 @@
   }
   scheduleRefresh();
 
+  applyTeam(TEAM_ABBREV, false);   // sync theme/logo/title with the saved team before first render
   load();
+</script>
+<script>
+  // Registering a service worker (with a fetch handler) is what lets Android
+  // browsers offer "Install app" instead of just a home-screen shortcut, and it
+  // caches the app shell + help docs for a more consistent offline experience.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
 </script>
 </body>
 </html>
