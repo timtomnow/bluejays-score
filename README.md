@@ -1,6 +1,6 @@
 # Blue Jays Score
 
-A lightweight web app for tracking the Toronto Blue Jays — live score, game situation, standings, and more. Installable as a home screen app on Android and iPhone.
+A lightweight web app for tracking the Toronto Blue Jays — or any of the 30 MLB teams — with live scores, game situation, standings, and more. Installable as a home screen app on Android and iPhone.
 
 **[Live demo](https://timtomnow.github.io/bluejays-score/)**
 
@@ -32,7 +32,7 @@ A lightweight web app for tracking the Toronto Blue Jays — live score, game si
 
 **Season context**
 - Season record, winning %, and current streak
-- Full AL East standings with games back and streak
+- Full division standings with games back and streak
 - Last 5 completed games (W/L, score, opponent) — each clickable for full game stats and play-by-play
 - Next 3 upcoming scheduled games with date, time, and probable starters
 
@@ -41,9 +41,33 @@ A lightweight web app for tracking the Toronto Blue Jays — live score, game si
 - Every 60 seconds when a game is scheduled (to catch first pitch)
 - Every 5 minutes on off days
 
+## Settings & switching teams
+
+Tap the **gear** icon in the footer to open Settings, which has three cards:
+
+- **About** — app description and links.
+- **Team** — pick any of the 30 MLB teams from the dropdown. The whole app
+  recolors to that team's brand colors (background, accents, highlights), swaps
+  the header logo and title, and repoints scores, standings (to the team's
+  division), and recent/upcoming games. Your choice is saved on the device and
+  restored on the next visit — no rebuild or redeploy needed.
+- **Help guide** — in-app, process-focused how-to guides.
+
 ## In-app help
 
-A **?** icon in the app footer loads this README file directly from GitHub, so any updates to the docs are always reflected in the app without a redeploy.
+The Help card in Settings reads guides from `docs/help/` — an `index.json`
+listing guide slugs, plus one Markdown file per slug with `title / category /
+order / summary` frontmatter. Guides are grouped by category and browsable as
+individual pages, per-section pages, or a single full-docs view. Drop new
+Markdown guides into `docs/help/` (and list them in `index.json`) and they
+appear automatically. Until any are published, the Help card shows an empty
+state.
+
+## Offline support
+
+A service worker precaches the app shell (and the help docs) so the app keeps
+working offline and qualifies as an installable PWA. Live score data is always
+fetched fresh from the network and never cached.
 
 ## Install on your phone
 
