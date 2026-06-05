@@ -61,6 +61,10 @@
     .score-vs   { font-size: 16px; color: #ccc; padding: 0 12px; flex-shrink: 0; }
     .team-record { font-size: 11px; color: #c0c0c0; margin-top: 2px; }
 
+    /* No-spoilers mode: blur score displays until tapped. */
+    .spoiler { display: inline-block; filter: blur(10px); cursor: pointer; border-radius: 6px; user-select: none; -webkit-tap-highlight-color: transparent; transition: filter .18s ease; }
+    .spoiler.revealed { filter: none; cursor: default; }
+
     /* ── Situation (count / bases / outs) ── */
     .situation { display: flex; align-items: center; justify-content: space-around; padding: 4px 0; }
     .sit-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
@@ -163,6 +167,15 @@
     .set-card { background:#fff; border-radius:14px; padding:16px; margin-bottom:14px; }
     .set-card:last-child { margin-bottom:0; }
     .set-card-title { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; color:#8a8a8e; margin:0 0 12px; }
+    /* Settings toggle row + iOS-style switch */
+    .set-toggle { display:flex; align-items:center; justify-content:space-between; gap:14px; cursor:pointer; }
+    .set-toggle-label { font-size:15px; font-weight:600; color:#1c1c1e; }
+    .set-switch { position:relative; flex-shrink:0; width:46px; height:28px; }
+    .set-switch input { position:absolute; opacity:0; width:0; height:0; }
+    .set-switch .slider { position:absolute; inset:0; background:#d6d6dc; border-radius:999px; transition:background .2s; }
+    .set-switch .slider::before { content:''; position:absolute; height:22px; width:22px; left:3px; top:3px; background:#fff; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,.25); transition:transform .2s; }
+    .set-switch input:checked + .slider { background:var(--accent); }
+    .set-switch input:checked + .slider::before { transform:translateX(18px); }
     .set-app-name { font-size:16px; font-weight:700; color:#1c1c1e; margin-bottom:6px; }
     .set-desc { font-size:13px; line-height:1.5; color:#666; margin-bottom:14px; }
     .set-links { display:flex; flex-direction:column; gap:10px; }
@@ -463,6 +476,33 @@
   function onTeamChange(val) {
     applyTeam(val);
     load();   // re-render every section for the newly selected team
+  }
+
+  // ── No-spoilers mode ───────────────────────────────────────────────────────
+  // When on, score displays on the home screen are blurred until tapped; the
+  // game time and live inning still show so you know when/where a game is.
+  const SPOILER_KEY = 'bluejays-score:no-spoilers';
+  let NO_SPOILERS = localStorage.getItem(SPOILER_KEY) === '1';
+
+  function setNoSpoilers(on) {
+    NO_SPOILERS = !!on;
+    localStorage.setItem(SPOILER_KEY, NO_SPOILERS ? '1' : '0');
+    load();   // re-render the home screen with scores blurred / shown
+  }
+
+  // Wrap score-bearing markup so No-spoilers mode blurs it until tapped.
+  function spoiler(html) {
+    return NO_SPOILERS
+      ? `<span class="spoiler" title="Tap to reveal score" onclick="revealSpoiler(event,this)">${html}</span>`
+      : html;
+  }
+
+  // Reveal every blurred score within the tapped element's card at once, and
+  // stop the tap from also triggering the card/row's own click handler.
+  function revealSpoiler(e, el) {
+    e.stopPropagation();
+    const scope = el.closest('.card') || document;
+    scope.querySelectorAll('.spoiler').forEach(s => s.classList.add('revealed'));
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────
@@ -920,6 +960,9 @@
 
     const awScore = isPreview ? '—' : (aw?.score ?? '0');
     const hmScore = isPreview ? '—' : (hm?.score ?? '0');
+    // Blur the live/final scores in No-spoilers mode (preview has no score to hide).
+    const awScoreHtml = isPreview ? awScore : spoiler(awScore);
+    const hmScoreHtml = isPreview ? hmScore : spoiler(hmScore);
 
     const jaysAway = aw?.team?.id === TEAM_ID;
     const awWon = isFinal && aw?.score > hm?.score;
@@ -946,12 +989,12 @@
       <div class="score-header">
         <span class="badge ${badgeCls}">${badgeTxt}</span>
         ${isLive    ? `<span style="font-size:13px;color:#888;font-weight:600">${inningStr(fls || ls)}</span>` : ''}
-        ${isPreview ? `<span style="font-size:13px;font-weight:600;color:#333">${fmtTime(g.gameDate)}</span>` : ''}
+        ${(isPreview || NO_SPOILERS) ? `<span style="font-size:13px;font-weight:600;color:#333">${fmtTime(g.gameDate)}</span>` : ''}
       </div>
       <div class="score-row">
         <div class="team-col">
           <div class="team-abbr">${awAbbr}</div>
-          <div class="score-num ${isFinal && awWon ? 'hi' : isFinal && !awWon ? 'dim' : ''}">${awScore}</div>
+          <div class="score-num ${isFinal && awWon ? 'hi' : isFinal && !awWon ? 'dim' : ''}">${awScoreHtml}</div>
           <div class="team-record">${awRec}</div>
         </div>
         ${isPreview
@@ -959,7 +1002,7 @@
           : `<span class="score-dash">–</span>`}
         <div class="team-col">
           <div class="team-abbr">${hmAbbr}</div>
-          <div class="score-num ${isFinal && hmWon ? 'hi' : isFinal && !hmWon ? 'dim' : ''}">${hmScore}</div>
+          <div class="score-num ${isFinal && hmWon ? 'hi' : isFinal && !hmWon ? 'dim' : ''}">${hmScoreHtml}</div>
           <div class="team-record">${hmRec}</div>
         </div>
       </div>
@@ -1059,7 +1102,7 @@
           loser  && `<div class="dec-item"><div class="dec-type dec-loss">Loss</div><div class="dec-name">${loser.fullName}</div></div>`,
           save   && `<div class="dec-item"><div class="dec-type dec-save">Save</div><div class="dec-name">${save.fullName}</div></div>`,
         ].filter(Boolean).join('');
-        html += `<div class="sec"><div class="decisions">${items}</div></div>`;
+        html += `<div class="sec">${spoiler(`<div class="decisions">${items}</div>`)}</div>`;
       }
     }
 
@@ -1069,7 +1112,7 @@
       const isTopInn = fls?.isTopInning ?? false;
       html += `<div class="sec">
         <div class="sec-title">Line Score</div>
-        ${lineScore(ls, awAbbr, hmAbbr, liveInn, isTopInn)}
+        ${spoiler(lineScore(ls, awAbbr, hmAbbr, liveInn, isTopInn))}
       </div>`;
     }
 
@@ -1240,7 +1283,7 @@
             <div class="l5-opp">${ha}${oppName}</div>
             <div class="l5-meta">${dateStr}</div>
           </div>
-          <div class="l5-result ${resCls}">${resLabel}</div>
+          <div class="l5-result ${resCls}">${spoiler(resLabel)}</div>
           <span class="l5-chev">›</span>
         </div>`;
       }).join('');
@@ -1603,6 +1646,22 @@
     </div>`;
   }
 
+  function noSpoilerCardHtml() {
+    return `<div class="set-card">
+      <div class="set-card-title">Viewing</div>
+      <label class="set-toggle">
+        <div>
+          <div class="set-toggle-label">No-spoilers mode</div>
+        </div>
+        <span class="set-switch">
+          <input type="checkbox" ${NO_SPOILERS ? 'checked' : ''} onchange="setNoSpoilers(this.checked)" aria-label="No-spoilers mode">
+          <span class="slider"></span>
+        </span>
+      </label>
+      <div class="set-desc" style="margin:10px 0 0">Hides scores on the home screen. The game time and live inning still show — tap a blurred score to reveal it.</div>
+    </div>`;
+  }
+
   function helpCardHtml(guides) {
     if (!guides.length) {
       return `<div class="set-card"><div class="set-card-title">Help guide</div>
@@ -1631,9 +1690,9 @@
   // 1. Index — About card + Team card + the help index.
   async function renderSettingsHome() {
     setHelpHead('Settings', false);
-    setBody().innerHTML = aboutCardHtml() + teamCardHtml() + `<div class="set-card"><div class="set-card-title">Help guide</div><div class="loading">Loading…</div></div>`;
+    setBody().innerHTML = aboutCardHtml() + teamCardHtml() + noSpoilerCardHtml() + `<div class="set-card"><div class="set-card-title">Help guide</div><div class="loading">Loading…</div></div>`;
     const guides = await loadGuides();
-    setBody().innerHTML = aboutCardHtml() + teamCardHtml() + helpCardHtml(guides);
+    setBody().innerHTML = aboutCardHtml() + teamCardHtml() + noSpoilerCardHtml() + helpCardHtml(guides);
     setBody().scrollTop = 0;
   }
 
